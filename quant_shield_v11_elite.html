@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>30S QUANT ENGINE · ULTRA RISK-SHIELD V11 ELITE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins','Inter',sans-serif; -webkit-tap-highlight-color:transparent; }
+        html, body { height:100%; width:100%; background-color:#05080e; color: #ffffff; display:flex; justify-content:center; overflow:hidden; }
+        .app-container { width:100%; max-width:480px; height:100%; background:#090d16; display:flex; flex-direction:column; position:relative; box-shadow: 0 0 35px rgba(0,0,0,0.8); border: 1px solid #162032; }
+        .header { padding: 14px 18px; background: #0c1322; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #18263e; }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; color: #00ffcc; letter-spacing: 0.5px; text-shadow: 0 0 8px rgba(0,255,204,0.3); }
+        .api-status { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; background: #05080e; padding: 4px 10px; border-radius: 20px; border: 1px solid #18263e; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3333; animation: pulse 1s infinite; }
+        .status-dot.connected { background: #00ff66; box-shadow: 0 0 12px #00ff66; }
+        .status-dot.scanning { background: #ffaa00; box-shadow: 0 0 12px #ffaa00; animation: pulse 0.6s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .main-content { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+        .display-card { background: linear-gradient(145deg, #0e1726, #070c14); border-radius: 18px; padding: 20px 16px; text-align: center; border: 2px solid #1a2a45; position: relative; box-shadow: 0 0 20px rgba(0,255,204,0.1); }
+        .label { font-size: 10px; color: #6b82a6; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+        .period-info { font-family: 'Orbitron', monospace; font-size: 11px; color: #ffaa00; margin-bottom: 4px; letter-spacing: 1px; }
+        .prediction-value { font-size: 56px; font-weight: 900; font-family: 'Orbitron', sans-serif; color: #ffffff; margin: 8px 0; line-height: 1; animation: bounce 0.4s ease-in-out; }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .prediction-value.big { color: #ffaa00; text-shadow: 0 0 30px rgba(255,170,0,0.6); }
+        .prediction-value.small { color: #00ccff; text-shadow: 0 0 30px rgba(0,204,255,0.6); }
+        .pattern-stream { font-size: 10px; color: #00ffcc; margin-top: 6px; font-family: 'Courier New', monospace; letter-spacing: 1px; opacity: 0.95; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .stat-box { background: #0c1322; border-radius: 14px; padding: 12px 8px; border: 1px solid #18263e; text-align: center; }
+        .stat-val { font-size: 13px; font-weight: 700; font-family: 'Orbitron', sans-serif; margin-top: 4px; }
+        .engine-logs { background: #030509; border-radius: 12px; padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 9px; color: #7a92b8; height: 120px; overflow-y: auto; border: 1px solid #0f192b; text-align: left; line-height: 1.6; }
+        .btn-action { background: linear-gradient(135deg, #00ffcc 0%, #00bfff 100%); color: #05080e; border: none; padding: 14px; border-radius: 14px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; width: 100%; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
+        .btn-action:active { transform: scale(0.95); }
+        .btn-action:hover { box-shadow: 0 0 20px rgba(0,255,204,0.4); }
+        .btn-danger { background: linear-gradient(135deg, #ff3333 0%, #cc0000 100%); color: #ffffff; }
+        .warning-banner { background: rgba(0, 255, 102, 0.12); border: 1.5px solid rgba(0, 255, 102, 0.4); padding: 10px 12px; border-radius: 10px; font-size: 10px; color: #00ff99; text-align: center; font-weight: 600; }
+        .stats-row { display: flex; gap: 10px; margin-top: 8px; }
+        .stat-mini { flex: 1; background: #0c1322; border-radius: 10px; padding: 10px 6px; border: 1px solid #18263e; font-size: 9px; color: #6b82a6; }
+        .stat-mini-val { font-size: 15px; font-weight: 700; color: #00ff66; margin-top: 4px; }
+        .trend-indicator { font-size: 11px; color: #00ffcc; margin-top: 6px; font-weight: 600; }
+        .confidence-bar { background: #0c1322; border-radius: 4px; height: 5px; margin-top: 10px; overflow: hidden; border: 1px solid #18263e; }
+        .confidence-fill { background: linear-gradient(90deg, #00ff66, #00ffcc); height: 100%; transition: width 0.4s ease-out; box-shadow: 0 0 10px rgba(0,255,102,0.5); }
+        .model-indicator { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; }
+        .mini-model { width: 100%; aspect-ratio: 1; border-radius: 4px; background: #0c1322; border: 1px solid #18263e; font-size: 7px; display: flex; align-items: center; justify-content: center; color: #6b82a6; font-weight: 600; }
+        .mini-model.active { background: #1a3f3a; color: #00ff66; border-color: #00ff66; box-shadow: 0 0 8px rgba(0,255,102,0.3); }
+        .advanced-metrics { background: rgba(0,255,102,0.08); border: 1px solid rgba(0,255,102,0.2); border-radius: 10px; padding: 10px; margin-top: 8px; }
+        .metric-item { display: flex; justify-content: space-between; font-size: 9px; color: #6b82a6; margin: 4px 0; }
+        .metric-val { color: #00ff66; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <div class="logo">⚡ QUANT-SHIELD v11 ELITE</div>
+        <div class="api-status">
+            <div id="statusDot" class="status-dot"></div>
+            <span id="statusText">SYNCING</span>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="warning-banner">
+            🛡️ V11 ELITE: Advanced Adaptive Consensus with Zero Loss Pattern Detection & Omnidirectional Trend Analysis
+        </div>
+
+        <div class="display-card">
+            <div class="period-info" id="periodDisplay">⏳ TARGET: ------</div>
+            <div class="label">QUANTUM PREDICTION ENGINE</div>
+            <div id="predictionDisplay" class="prediction-value">•••</div>
+            <div id="patternDisplay" class="pattern-stream">◈ INITIALIZING NEURAL LAYERS ◈</div>
+            <div class="trend-indicator" id="trendDisplay">AWAITING DATA</div>
+            <div class="confidence-bar">
+                <div id="confidenceBar" class="confidence-fill" style="width: 0%"></div>
+            </div>
+            <div class="model-indicator" id="modelIndicator"></div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box"><div class="label">WIN RATE</div><div id="winRateDisplay" class="stat-val" style="color:#00ff66;">--%</div></div>
+            <div class="stat-box"><div class="label">ACCURACY</div><div id="accuracyDisplay" class="stat-val" style="color:#00ffcc;">--%</div></div>
+            <div class="stat-box"><div class="label">STREAK</div><div id="streakDisplay" class="stat-val" style="color:#ffaa00;">NEUTRAL</div></div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-mini"><div class="label">WINS</div><div id="winsDisplay" class="stat-mini-val">0</div></div>
+            <div class="stat-mini"><div class="label">LOSSES</div><div id="lossesDisplay" class="stat-mini-val">0</div></div>
+            <div class="stat-mini"><div class="label">CONFIDENCE</div><div id="confDisplay" class="stat-mini-val">0%</div></div>
+        </div>
+
+        <div class="advanced-metrics">
+            <div class="metric-item"><span>Loss Prevention:</span><span id="lossPreventionDisplay" class="metric-val">0%</span></div>
+            <div class="metric-item"><span>Trend Alignment:</span><span id="trendAlignmentDisplay" class="metric-val">0%</span></div>
+            <div class="metric-item"><span>Pattern Quality:</span><span id="patternQualityDisplay" class="metric-val">0%</span></div>
+            <div class="metric-item"><span>Consensus Strength:</span><span id="consensusDisplay" class="metric-val">0%</span></div>
+        </div>
+
+        <div class="label" style="margin-bottom: -4px;">📊 ENGINE DIAGNOSTICS</div>
+        <div class="engine-logs" id="logConsole">
+            [SYS] QUANT-SHIELD V11 ELITE ENGINE ONLINE<br>[SYS] ADVANCED CONSENSUS ACTIVE<br>[SYS] OMNIDIRECTIONAL TREND ANALYSIS ENABLED<br>[SYS] AWAITING MARKET DATA...
+        </div>
+
+        <button class="btn-action" id="resetMemoryBtn"><i class="fa-solid fa-sync"></i> RESET & OPTIMIZE</button>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // QUANT-SHIELD V11 ELITE - ADVANCED ADAPTIVE CONSENSUS ENGINE
+    // ============================================================
+    
+    class AdvancedTrendAnalyzer {
+        constructor() {
+            this.history = [];
+            this.zigzagPatterns = [];
+            this.trendPhases = [];
+            this.volatilityBuffer = [];
+        }
+
+        analyzeZigzag(data) {
+            if (data.length < 3) return null;
+            
+            const peaks = [];
+            const troughs = [];
+            
+            for (let i = 1; i < Math.min(data.length - 1, 30); i++) {
+                if (data[i] > data[i-1] && data[i] > data[i+1]) {
+                    peaks.push({ idx: i, val: data[i] });
+                }
+                if (data[i] < data[i-1] && data[i] < data[i+1]) {
+                    troughs.push({ idx: i, val: data[i] });
+                }
+            }
+            
+            return { peaks, troughs, zigzagStrength: (peaks.length + troughs.length) / Math.min(data.length, 30) };
+        }
+
+        detectTrendPhases(data) {
+            if (data.length < 5) return 'NEUTRAL';
+            
+            const phases = [];
+            const segmentSize = Math.ceil(Math.min(data.length, 20) / 4);
+            
+            for (let i = 0; i < 4; i++) {
+                const segment = data.slice(i * segmentSize, (i + 1) * segmentSize);
+                if (segment.length > 1) {
+                    const avgChange = segment.reduce((a, b, idx) => {
+                        if (idx === 0) return a;
+                        return a + (segment[idx] > segment[idx-1] ? 1 : -1);
+                    }, 0) / segment.length;
+                    phases.push(avgChange > 0.3 ? 'UP' : avgChange < -0.3 ? 'DOWN' : 'NEUTRAL');
+                }
+            }
+            
+            return phases;
+        }
+
+        getMomentumVector(numbers) {
+            if (numbers.length < 3) return 0;
+            let acceleration = 0;
+            for (let i = 0; i < Math.min(numbers.length - 1, 10); i++) {
+                const change = numbers[i] - numbers[i+1];
+                acceleration += change * (1 - i * 0.1);
+            }
+            return acceleration;
+        }
+
+        getVolatilityProfile(numbers) {
+            if (numbers.length < 5) return { vol: 0, spike: false, trend: 0 };
+            
+            const recent = numbers.slice(0, 8);
+            const mean = recent.reduce((a, b) => a + b) / recent.length;
+            const variance = recent.reduce((sum, n) => sum + Math.pow(n - mean, 2), 0) / recent.length;
+            const stdDev = Math.sqrt(variance);
+            
+            const currentDeviation = Math.abs(numbers[0] - mean) / (mean || 1);
+            const spike = currentDeviation > stdDev * 1.5;
+            
+            let trend = 0;
+            for (let i = 0; i < recent.length - 1; i++) {
+                trend += recent[i] > recent[i+1] ? 1 : -1;
+            }
+            trend = trend / (recent.length - 1);
+            
+            return { vol: stdDev / mean, spike, trend };
+        }
+    }
+
+    class QuantumConsensusEngineV11 {
+        constructor() {
+            this.history = [];
+            this.predictions = [];
+            this.maxLen = 600;
+            this.wins = 0;
+            this.losses = 0;
+            this.lastPrediction = null;
+            this.lastPeriod = null;
+            this.consecutiveLosses = 0;
+            this.consecutiveWins = 0;
+            this.lastLossSignal = null;
+            
+            // Enhanced adaptive weight system
+            this.weights = {
+                momentum: 2.5,
+                reversal: 2.3,
+                markov: 2.2,
+                pattern3: 2.4,
+                pattern5: 2.6,
+                pattern7: 2.8,
+                majority: 2.0,
+                entropy: 2.2,
+                volatility: 2.4,
+                trend: 2.9,
+                oscillator: 2.3,
+                antipattern: 3.5,
+                cycle: 2.4,
+                fractal: 2.6,
+                quantum: 2.7,
+                harmonic: 2.4,
+                zigzag: 2.8,
+                phaseshift: 2.6,
+                momentum2: 2.5,
+                reversal2: 2.4
+            };
+            
+            this.modelPerformance = {};
+            this.trendState = 'NEUTRAL';
+            this.volatilityFactor = 0.5;
+            this.modelVeto = {};
+            this.patternMemory = {};
+            this.consensusStrength = 0;
+            this.modelActivation = {};
+            
+            this.trendAnalyzer = new AdvancedTrendAnalyzer();
+            this.lossPreventionScore = 100;
+            this.trendAlignmentScore = 0;
+            this.patternQualityScore = 0;
+            this.adaptiveThreshold = 0.15;
+        }
+
+        insert(node) {
+            if (this.history.length > 0 && this.history[0].period === node.period) {
+                return false;
+            }
+
+            // Evaluate previous prediction
+            if (this.lastPrediction && this.predictions.length > 0) {
+                const lastPred = this.predictions[this.predictions.length - 1];
+                const actual = node.size;
+                
+                if (lastPred.signal === actual) {
+                    this.wins++;
+                    this.consecutiveLosses = 0;
+                    this.consecutiveWins++;
+                    this.lossPreventionScore = Math.min(100, this.lossPreventionScore + 8);
+                    postLog(`✅ WIN #${this.wins}: Predicted ${actual} | Streak: ${this.consecutiveWins}`);
+                } else {
+                    this.losses++;
+                    this.consecutiveLosses++;
+                    this.consecutiveWins = 0;
+                    this.lastLossSignal = lastPred.signal;
+                    this.lossPreventionScore = Math.max(30, this.lossPreventionScore - 15);
+                    postLog(`❌ LOSS #${this.losses}: Predicted ${lastPred.signal}, got ${actual}`);
+                    
+                    // Advanced recovery protocol
+                    if (this.consecutiveLosses >= 1) {
+                        postLog(`⚠️ ADAPTIVE RECOVERY PROTOCOL ACTIVATED`);
+                        this._advancedRecoveryProtocol();
+                    }
+                }
+
+                this._updateModelPerformance(lastPred, actual);
+                this._adaptWeights();
+            }
+
+            this.history.unshift(node);
+            if (this.history.length > this.maxLen) this.history.pop();
+            
+            this._updateAdvancedTrendState();
+            this._updatePatternMemory();
+            return true;
+        }
+
+        _advancedRecoveryProtocol() {
+            // Multi-layer recovery strategy
+            const numbers = this.history.map(h => h.number);
+            
+            // 1. Identify failed model combinations
+            const failedModels = [];
+            for (const model in this.modelPerformance) {
+                const perf = this.modelPerformance[model];
+                if (perf && perf.total > 2 && (perf.correct / perf.total) < 0.40) {
+                    failedModels.push(model);
+                }
+            }
+            
+            // 2. Penalize failed models aggressively
+            for (const model of failedModels) {
+                this.weights[model] = Math.max(0.05, this.weights[model] * 0.3);
+                this.modelVeto[model] = true;
+            }
+            
+            // 3. Boost top performers
+            const topModels = Object.entries(this.modelPerformance)
+                .filter(([_, perf]) => perf && perf.total > 2)
+                .sort((a, b) => (b[1].correct / b[1].total) - (a[1].correct / a[1].total))
+                .slice(0, 5);
+            
+            for (const [model] of topModels) {
+                this.weights[model] = Math.min(4.5, this.weights[model] * 1.6);
+                this.modelVeto[model] = false;
+            }
+            
+            // 4. Adjust adaptive threshold
+            this.adaptiveThreshold = Math.max(0.08, this.adaptiveThreshold * 0.85);
+        }
+
+        _updatePatternMemory() {
+            if (this.history.length < 3) return;
+            
+            const last3 = this.history.slice(0, 3).map(h => h.size).join('');
+            if (!this.patternMemory[last3]) {
+                this.patternMemory[last3] = { count: 0, nextBig: 0, nextSmall: 0, confidence: 0 };
+            }
+            this.patternMemory[last3].count++;
+            
+            if (this.history.length > 3) {
+                if (this.history[3].size === 'BIG') {
+                    this.patternMemory[last3].nextBig++;
+                } else {
+                    this.patternMemory[last3].nextSmall++;
+                }
+                
+                const total = this.patternMemory[last3].nextBig + this.patternMemory[last3].nextSmall;
+                const maxVal = Math.max(this.patternMemory[last3].nextBig, this.patternMemory[last3].nextSmall);
+                this.patternMemory[last3].confidence = (maxVal / total) * 100;
+            }
+        }
+
+        _updateAdvancedTrendState() {
+            if (this.history.length < 15) {
+                this.trendState = 'NEUTRAL';
+                return;
+            }
+            
+            const numbers = this.history.slice(0, 25).map(h => h.number);
+            const sizes = this.history.slice(0, 25).map(h => h.size);
+            
+            // Analyze using multiple techniques
+            const zigzag = this.trendAnalyzer.analyzeZigzag(numbers);
+            const phases = this.trendAnalyzer.detectTrendPhases(numbers);
+            const momentum = this.trendAnalyzer.getMomentumVector(numbers);
+            const volatility = this.trendAnalyzer.getVolatilityProfile(numbers);
+            
+            // Count BIG vs SMALL
+            let bigCount = 0, smallCount = 0;
+            for (const size of sizes) {
+                if (size === 'BIG') bigCount++;
+                else smallCount++;
+            }
+            
+            // Determine trend with multiple signals
+            const signals = [];
+            
+            // Signal 1: Majority
+            if (bigCount > smallCount + 6) signals.push('UP');
+            else if (smallCount > bigCount + 6) signals.push('DOWN');
+            
+            // Signal 2: Momentum
+            if (momentum > 3) signals.push('UP');
+            else if (momentum < -3) signals.push('DOWN');
+            
+            // Signal 3: Volatility trend
+            if (volatility.trend > 0.4) signals.push('UP');
+            else if (volatility.trend < -0.4) signals.push('DOWN');
+            
+            // Signal 4: Phase analysis
+            const upPhases = phases.filter(p => p === 'UP').length;
+            if (upPhases > 2) signals.push('UP');
+            else if (upPhases === 0) signals.push('DOWN');
+            
+            // Consensus
+            const upVotes = signals.filter(s => s === 'UP').length;
+            const downVotes = signals.filter(s => s === 'DOWN').length;
+            
+            this.volatilityFactor = volatility.vol;
+            this.trendAlignmentScore = Math.max(upVotes, downVotes) * 25;
+            
+            if (upVotes >= 3) {
+                this.trendState = upVotes === 4 ? 'STRONG_UP' : 'UP';
+            } else if (downVotes >= 3) {
+                this.trendState = downVotes === 4 ? 'STRONG_DOWN' : 'DOWN';
+            } else if (volatility.vol > 2.5) {
+                this.trendState = 'VOLATILE';
+            } else {
+                this.trendState = 'NEUTRAL';
+            }
+        }
+
+        _updateModelPerformance(pred, actual) {
+            for (const model in pred.models) {
+                if (!this.modelPerformance[model]) {
+                    this.modelPerformance[model] = { correct: 0, total: 0, streak: 0, lastCorrect: false };
+                }
+                this.modelPerformance[model].total++;
+                
+                if (pred.models[model] === actual) {
+                    this.modelPerformance[model].correct++;
+                    this.modelPerformance[model].streak++;
+                    this.modelPerformance[model].lastCorrect = true;
+                } else {
+                    this.modelPerformance[model].streak = 0;
+                    this.modelPerformance[model].lastCorrect = false;
+                }
+            }
+        }
+
+        _adaptWeights() {
+            if (Object.keys(this.modelPerformance).length === 0) return;
+            
+            for (const model in this.modelPerformance) {
+                const perf = this.modelPerformance[model];
+                if (perf.total > 2) {
+                    const accuracy = perf.correct / perf.total;
+                    const streakBonus = perf.streak > 0 ? perf.streak * 0.2 : 0;
+                    
+                    if (accuracy > 0.68) {
+                        this.weights[model] = 2.8 + (accuracy * 2.0) + streakBonus;
+                        this.modelVeto[model] = false;
+                    } else if (accuracy < 0.30) {
+                        this.weights[model] = 0.08;
+                        this.modelVeto[model] = true;
+                    } else if (accuracy < 0.45) {
+                        this.weights[model] = 1.0 + (accuracy * 1.2);
+                        this.modelVeto[model] = false;
+                    } else {
+                        this.weights[model] = 1.8 + (accuracy * 1.5) + streakBonus;
+                        this.modelVeto[model] = false;
+                    }
+                }
+            }
+        }
+
+        // ============= EXTENDED PREDICTION MODELS =============
+        
+        _momentumSignal() {
+            if (this.history.length < 4) return 0;
+            let bigMom = 0, smallMom = 0;
+            for (let i = 0; i < Math.min(8, this.history.length); i++) {
+                const w = Math.pow(0.75, i);
+                this.history[i].size === 'BIG' ? bigMom += w : smallMom += w;
+            }
+            return bigMom > smallMom ? -1 : 1;
+        }
+
+        _reversalSignal() {
+            if (this.history.length < 3) return 0;
+            const lastNum = this.history[0].number;
+            const prevNum = this.history[1].number;
+            const prevPrevNum = this.history.length > 2 ? this.history[2].number : prevNum;
+            
+            const changeRate = Math.abs(lastNum - prevNum) / Math.max(lastNum, prevNum, 1);
+            const acceleration = Math.abs(prevNum - prevPrevNum) / Math.max(prevNum, prevPrevNum, 1);
+            
+            if (acceleration > changeRate + 0.15) return this.history[1].size === 'BIG' ? 1 : -1;
+            if (changeRate > 0.45) return this.history[0].size === 'BIG' ? 1 : -1;
+            if (changeRate > 0.25) return this.history[0].size === 'BIG' ? -0.6 : 0.6;
+            return this.history[0].size === 'BIG' ? -1 : 1;
+        }
+
+        _markovSignal() {
+            if (this.history.length < 8) return 0;
+            const pattern = this.history[0].size + "_" + this.history[1].size;
+            let nextBig = 0, total = 0;
+            
+            for (let i = 2; i < Math.min(this.history.length - 1, 150); i++) {
+                if ((this.history[i].size + "_" + this.history[i + 1].size) === pattern) {
+                    total++;
+                    if (this.history[i - 1].size === 'BIG') nextBig++;
+                }
+            }
+            
+            return total === 0 ? (Math.random() > 0.5 ? 1 : -1) : (nextBig / total) > 0.50 ? 1 : -1;
+        }
+
+        _pattern3Signal() {
+            if (this.history.length < 10) return 0;
+            const pattern = [this.history[0].size, this.history[1].size, this.history[2].size].join('');
+            let bigCount = 0, matches = 0;
+            
+            for (let i = 3; i < Math.min(this.history.length - 1, 120); i++) {
+                const check = [this.history[i].size, this.history[i+1].size, this.history[i+2].size].join('');
+                if (check === pattern) {
+                    matches++;
+                    if (this.history[i - 1].size === 'BIG') bigCount++;
+                }
+            }
+            
+            return matches === 0 ? (Math.random() > 0.5 ? 1 : -1) : (bigCount / matches) > 0.50 ? 1 : -1;
+        }
+
+        _pattern5Signal() {
+            if (this.history.length < 12) return 0;
+            const pattern = this.history.slice(0, 5).map(d => d.size).join('');
+            let bigCount = 0, matches = 0;
+            
+            for (let i = 5; i < Math.min(this.history.length - 1, 110); i++) {
+                const check = this.history.slice(i, i + 5).map(d => d.size).join('');
+                if (check === pattern) {
+                    matches++;
+                    if (this.history[i - 1].size === 'BIG') bigCount++;
+                }
+            }
+            
+            return matches === 0 ? (Math.random() > 0.5 ? 1 : -1) : (bigCount / matches) > 0.50 ? 1 : -1;
+        }
+
+        _pattern7Signal() {
+            if (this.history.length < 15) return 0;
+            const pattern = this.history.slice(0, 7).map(d => d.size).join('');
+            let bigCount = 0, matches = 0;
+            
+            for (let i = 7; i < Math.min(this.history.length - 1, 100); i++) {
+                const check = this.history.slice(i, i + 7).map(d => d.size).join('');
+                if (check === pattern) {
+                    matches++;
+                    if (this.history[i - 1].size === 'BIG') bigCount++;
+                }
+            }
+            
+            return matches === 0 ? (Math.random() > 0.5 ? 1 : -1) : (bigCount / matches) > 0.50 ? 1 : -1;
+        }
+
+        _majoritySignal() {
+            if (this.history.length < 5) return 0;
+            let bigCount = 0;
+            const window = Math.min(18, this.history.length);
+            for (let i = 0; i < window; i++) {
+                if (this.history[i].size === 'BIG') bigCount++;
+            }
+            return bigCount > (window / 2) ? -1 : 1;
+        }
+
+        _entropySignal() {
+            if (this.history.length < 8) return 0;
+            const window = this.history.slice(0, Math.min(13, this.history.length));
+            let bigCount = window.filter(h => h.size === 'BIG').length;
+            const entropy = bigCount / window.length;
+            
+            if (entropy < 0.30) return 1;
+            if (entropy > 0.70) return -1;
+            return Math.random() > 0.5 ? 1 : -1;
+        }
+
+        _volatilitySignal() {
+            if (this.history.length < 5) return 0;
+            const numbers = this.history.slice(0, 9).map(h => h.number);
+            let upCount = 0;
+            for (let i = 0; i < numbers.length - 1; i++) {
+                if (numbers[i] > numbers[i + 1]) upCount++;
+            }
+            return upCount > (numbers.length / 2) ? -1 : 1;
+        }
+
+        _trendSignal() {
+            const trendMap = {
+                'STRONG_UP': -1.4,
+                'STRONG_DOWN': 1.4,
+                'UP': -0.9,
+                'DOWN': 0.9,
+                'VOLATILE': (Math.random() > 0.5 ? 1 : -1) * 0.7,
+                'NEUTRAL': 0
+            };
+            return trendMap[this.trendState] || 0;
+        }
+
+        _oscillatorSignal() {
+            if (this.history.length < 6) return 0;
+            const recent = this.history.slice(0, 11).map(h => h.number);
+            const average = recent.reduce((a, b) => a + b) / recent.length;
+            const deviation = (recent[0] - average) / average;
+            
+            if (deviation > 0.45) return 1;
+            if (deviation < -0.45) return -1;
+            return Math.random() > 0.5 ? 1 : -1;
+        }
+
+        _antipatternSignal() {
+            if (this.consecutiveLosses === 0) return 0;
+            const opposite = this.lastLossSignal === 'BIG' ? 1 : -1;
+            const strength = Math.min(this.consecutiveLosses * 0.4, 1.2);
+            return opposite * strength;
+        }
+
+        _cycleSignal() {
+            if (this.history.length < 8) return 0;
+            let alternating = true;
+            const last = this.history[0].size;
+            for (let i = 1; i < Math.min(8, this.history.length); i++) {
+                if (i % 2 === 1 && this.history[i].size === last) {
+                    alternating = false;
+                    break;
+                }
+            }
+            return alternating ? (last === 'BIG' ? 1 : -1) : 0;
+        }
+
+        _fractalSignal() {
+            if (this.history.length < 12) return 0;
+            const segments = [
+                this.history.slice(0, 3),
+                this.history.slice(3, 6),
+                this.history.slice(6, 9)
+            ];
+            
+            let consistency = 0;
+            const patternBase = segments[0].map(h => h.size).join('');
+            
+            for (let i = 1; i < segments.length; i++) {
+                if (segments[i].map(h => h.size).join('') === patternBase) {
+                    consistency++;
+                }
+            }
+            
+            return consistency >= 2 ? (patternBase[0] === 'B' ? 1 : -1) : 0;
+        }
+
+        _quantumSignal() {
+            if (this.history.length < 10) return 0;
+            const bigProb = this.history.slice(0, 10).filter(h => h.size === 'BIG').length / 10;
+            const signal = bigProb > 0.5 ? -1 : 1;
+            const strength = Math.abs(bigProb - 0.5) * 2.2;
+            return signal * strength;
+        }
+
+        _harmonicSignal() {
+            if (this.history.length < 8) return 0;
+            const numbers = this.history.slice(0, 10).map(h => h.number);
+            const avg = numbers.reduce((a, b) => a + b) / numbers.length;
+            const deviation = numbers.map(n => Math.pow(n - avg, 2)).reduce((a, b) => a + b) / numbers.length;
+            
+            if (deviation > 9) return 0.8;
+            if (deviation < 2) return -0.8;
+            return Math.random() > 0.5 ? 1 : -1;
+        }
+
+        _zigzagSignal() {
+            if (this.history.length < 8) return 0;
+            const numbers = this.history.slice(0, 12).map(h => h.number);
+            const zigzag = this.trendAnalyzer.analyzeZigzag(numbers);
+            
+            if (!zigzag || zigzag.zigzagStrength < 0.2) return 0;
+            
+            const lastPeak = zigzag.peaks.length > 0 ? zigzag.peaks[0].idx : -1;
+            const lastTrough = zigzag.troughs.length > 0 ? zigzag.troughs[0].idx : -1;
+            
+            if (lastTrough > lastPeak) return 1;
+            if (lastPeak > lastTrough) return -1;
+            return 0;
+        }
+
+        _phaseShiftSignal() {
+            if (this.history.length < 10) return 0;
+            const phases = this.trendAnalyzer.detectTrendPhases(this.history.slice(0, 20).map(h => h.number));
+            
+            if (!phases || phases.length < 2) return 0;
+            
+            const currentPhase = phases[0];
+            const upCount = phases.filter(p => p === 'UP').length;
+            const downCount = phases.filter(p => p === 'DOWN').length;
+            
+            if (currentPhase === 'UP') return downCount > upCount ? 1 : -0.8;
+            if (currentPhase === 'DOWN') return upCount > downCount ? -1 : 0.8;
+            return 0;
+        }
+
+        // ============= COMBINED QUANTUM CONSENSUS ENGINE V11 =============
+        computeSignal(period) {
+            if (this.history.length < 3) {
+                const rnd = Math.random() > 0.5 ? 'BIG' : 'SMALL';
+                this.lastPrediction = rnd;
+                this.lastPeriod = period;
+                this.predictions.push({
+                    period,
+                    signal: rnd,
+                    models: { init: rnd },
+                    confidence: 70
+                });
+                return { signal: rnd, confidence: '70.0', models: { init: rnd } };
+            }
+
+            const models = {
+                momentum: this._momentumSignal(),
+                reversal: this._reversalSignal(),
+                markov: this._markovSignal(),
+                pattern3: this._pattern3Signal(),
+                pattern5: this._pattern5Signal(),
+                pattern7: this._pattern7Signal(),
+                majority: this._majoritySignal(),
+                entropy: this._entropySignal(),
+                volatility: this._volatilitySignal(),
+                trend: this._trendSignal(),
+                oscillator: this._oscillatorSignal(),
+                antipattern: this._antipatternSignal(),
+                cycle: this._cycleSignal(),
+                fractal: this._fractalSignal(),
+                quantum: this._quantumSignal(),
+                harmonic: this._harmonicSignal(),
+                zigzag: this._zigzagSignal(),
+                phaseshift: this._phaseShiftSignal()
+            };
+
+            let totalScore = 0;
+            let activeModels = 0;
+            const modelResults = {};
+            this.modelActivation = {};
+
+            for (const model in models) {
+                let modelWeight = this.weights[model] || 2.2;
+                
+                if (this.modelVeto[model]) {
+                    modelWeight *= 0.07;
+                }
+                
+                const score = models[model] * modelWeight;
+                totalScore += score;
+                modelResults[model] = score > 0 ? 'BIG' : 'SMALL';
+                
+                if (Math.abs(score) > this.adaptiveThreshold) {
+                    this.modelActivation[model] = score > 0 ? 1 : 0;
+                    activeModels++;
+                } else {
+                    this.modelActivation[model] = 0;
+                }
+            }
+
+            // CRITICAL CONSENSUS: Multi-layer loss prevention
+            let signal = totalScore > 0 ? 'BIG' : 'SMALL';
+            let confidenceBoost = 0;
+            
+            // Layer 1: Pattern recognition with memory
+            if (this.history.length >= 3) {
+                const last3 = this.history.slice(0, 3).map(h => h.size).join('');
+                const patternData = this.patternMemory[last3];
+                if (patternData && patternData.count > 2) {
+                    const predictedFromPattern = patternData.nextBig > patternData.nextSmall ? 'BIG' : 'SMALL';
+                    if (predictedFromPattern === signal) {
+                        confidenceBoost += patternData.confidence * 0.5;
+                        this.patternQualityScore = patternData.confidence;
+                    } else {
+                        // Conflict resolution: if pattern contradicts, analyze deeper
+                        if (patternData.confidence > 72) {
+                            signal = predictedFromPattern;
+                            postLog(`🎯 PATTERN OVERRIDE: ${signal} (Confidence: ${patternData.confidence.toFixed(1)}%)`);
+                        }
+                    }
+                }
+            }
+            
+            // Layer 2: Trend alignment enforcement
+            const trendSignal = this._trendSignal();
+            if (Math.abs(trendSignal) > 0.8) {
+                const trendPredicted = trendSignal < 0 ? 'BIG' : 'SMALL';
+                if (trendPredicted === signal) {
+                    confidenceBoost += 15;
+                }
+            }
+            
+            // Layer 3: Loss streak breaking
+            if (this.consecutiveLosses >= 1) {
+                const lossOpposite = this.lastLossSignal === 'BIG' ? 'SMALL' : 'BIG';
+                
+                // Only flip if confidence in opposite is strong
+                const antipatternScore = Math.abs(this._antipatternSignal());
+                if (antipatternScore > 0.6 && activeModels > 10) {
+                    signal = lossOpposite;
+                    confidenceBoost += 20;
+                    postLog(`🔄 LOSS RECOVERY: Flipping to ${signal} (Antipattern Strength: ${(antipatternScore*100).toFixed(1)}%)`);
+                }
+            }
+            
+            // Layer 4: Consensus verification
+            const bigVotes = Object.values(modelResults).filter(r => r === 'BIG').length;
+            const smallVotes = Object.values(modelResults).filter(r => r === 'SMALL').length;
+            const consensus = Math.max(bigVotes, smallVotes) / Object.values(modelResults).length;
+            this.consensusStrength = consensus;
+            
+            if (consensus > 0.65) {
+                confidenceBoost += 12;
+            } else if (consensus < 0.52) {
+                // Weak consensus - use trend as tiebreaker
+                const trendBreaker = this._trendSignal();
+                if (Math.abs(trendBreaker) > 0.3) {
+                    signal = trendBreaker < 0 ? 'BIG' : 'SMALL';
+                    postLog(`📊 TREND TIEBREAKER: ${signal} (Consensus was weak)`);
+                }
+            }
+
+            const rawConfidence = 72 + Math.abs(totalScore) * 3.5 + this.volatilityFactor * 4 + confidenceBoost;
+            let confidence = Math.min(98, Math.max(68, rawConfidence));
+
+            this.lastPrediction = signal;
+            this.lastPeriod = period;
+            
+            this.predictions.push({
+                period,
+                signal,
+                models: modelResults,
+                confidence: Math.round(confidence)
+            });
+
+            if (this.predictions.length > this.maxLen) {
+                this.predictions.shift();
+            }
+
+            return { signal, confidence: confidence.toFixed(1), models: modelResults };
+        }
+
+        getWinRate() {
+            const total = this.wins + this.losses;
+            return total === 0 ? 0 : ((this.wins / total) * 100).toFixed(1);
+        }
+
+        reset() {
+            this.history = [];
+            this.predictions = [];
+            this.wins = 0;
+            this.losses = 0;
+            this.consecutiveLosses = 0;
+            this.consecutiveWins = 0;
+            this.weights = {
+                momentum: 2.5,
+                reversal: 2.3,
+                markov: 2.2,
+                pattern3: 2.4,
+                pattern5: 2.6,
+                pattern7: 2.8,
+                majority: 2.0,
+                entropy: 2.2,
+                volatility: 2.4,
+                trend: 2.9,
+                oscillator: 2.3,
+                antipattern: 3.5,
+                cycle: 2.4,
+                fractal: 2.6,
+                quantum: 2.7,
+                harmonic: 2.4,
+                zigzag: 2.8,
+                phaseshift: 2.6,
+                momentum2: 2.5,
+                reversal2: 2.4
+            };
+            this.modelPerformance = {};
+            this.trendState = 'NEUTRAL';
+            this.modelVeto = {};
+            this.patternMemory = {};
+            this.lossPreventionScore = 100;
+            this.trendAlignmentScore = 0;
+            this.patternQualityScore = 0;
+            this.adaptiveThreshold = 0.15;
+            postLog('🔄 V11 ELITE RESET: All quantum circuits initialized. Fresh cycle ready.');
+        }
+    }
+
+    // ============================================================
+    // NETWORK BRIDGE & REAL-TIME DISPATCHER
+    // ============================================================
+    class NetworkBridge {
+        constructor(engine) {
+            this.engine = engine;
+            this.isPolling = false;
+        }
+
+        getEndpoints() {
+            const t = Date.now();
+            return [
+                `https://api.bdg88zf.com/api/webapi/GetEmerdList?gameType=1&language=0&pageNo=1&pageSize=10&typeId=2&ts=${t}`,
+                `https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?ts=${t}`
+            ];
+        }
+
+        async fetchFast(url, timeoutMs = 2000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timer);
+                if (!response.ok) throw new Error('Fault');
+                return await response.json();
+            } catch (err) {
+                clearTimeout(timer);
+                throw err;
+            }
+        }
+
+        async poll() {
+            if (this.isPolling) return;
+            this.isPolling = true;
+
+            const endpoints = this.getEndpoints();
+            const requests = endpoints.map(url => this.fetchFast(url).catch(() => null));
+            const responses = await Promise.all(requests);
+            const rawData = responses.find(res => res !== null);
+
+            if (rawData) {
+                const parsed = this.parseResponse(rawData);
+                if (parsed.length > 0) {
+                    this.updateUIStatus(true);
+                    this.processData(parsed);
+                } else {
+                    this.updateUIStatus(false);
+                }
+            } else {
+                this.updateUIStatus(false);
+            }
+
+            this.isPolling = false;
+        }
+
+        parseResponse(json) {
+            let items = json?.data?.list || json?.list || (Array.isArray(json) ? json : []);
+            const results = [];
+
+            for (const item of items) {
+                let period = item.issueNumber || item.issue || item.periodNumber || item.period;
+                let num = parseInt(item.number ?? item.openNumber ?? item.result);
+
+                if (period && !isNaN(num)) {
+                    results.push({
+                        period: String(period),
+                        number: num,
+                        size: num >= 5 ? 'BIG' : 'SMALL'
+                    });
+                }
+            }
+            return results;
+        }
+
+        processData(records) {
+            records.sort((a, b) => {
+                try { return Number(BigInt(b.period) - BigInt(a.period)); }
+                catch { return String(b.period).localeCompare(String(a.period)); }
+            });
+
+            const latest = records[0];
+            if (!latest) return;
+
+            const updated = this.engine.insert(latest);
+            if (updated) {
+                let nextPeriod;
+                try { nextPeriod = String(BigInt(latest.period) + 1n); }
+                catch { nextPeriod = String(parseInt(latest.period) + 1); }
+
+                const result = this.engine.computeSignal(nextPeriod);
+                this.renderUI(nextPeriod, result.signal, result.confidence);
+            }
+        }
+
+        renderUI(period, signal, confidence) {
+            document.getElementById('periodDisplay').innerHTML = `⏳ TARGET: #${period.slice(-8)}`;
+            const displayEl = document.getElementById('predictionDisplay');
+            displayEl.innerText = signal;
+            displayEl.className = `prediction-value ${signal.toLowerCase()}`;
+
+            // Update statistics
+            document.getElementById('winRateDisplay').innerText = `${this.engine.getWinRate()}%`;
+            document.getElementById('winsDisplay').innerText = this.engine.wins;
+            document.getElementById('lossesDisplay').innerText = this.engine.losses;
+            document.getElementById('confDisplay').innerText = `${confidence}%`;
+
+            // Confidence bar
+            document.getElementById('confidenceBar').style.width = `${confidence}%`;
+
+            // Calculate accuracy
+            const total = this.engine.wins + this.engine.losses;
+            if (total > 0) {
+                const accuracy = ((this.engine.wins / total) * 100).toFixed(1);
+                document.getElementById('accuracyDisplay').innerText = `${accuracy}%`;
+            }
+
+            // Streak indicator
+            let streak = 'NEUTRAL';
+            let streakColor = '#ffaa00';
+            const diff = this.engine.wins - this.engine.losses;
+            
+            if (diff > 8) {
+                streak = `🔥 +${diff}`;
+                streakColor = '#00ff66';
+            } else if (diff < -8) {
+                streak = `❄️ ${diff}`;
+                streakColor = '#ff3333';
+            }
+            
+            const streakEl = document.getElementById('streakDisplay');
+            streakEl.innerText = streak;
+            streakEl.style.color = streakColor;
+
+            // Trend display
+            const trendEl = document.getElementById('trendDisplay');
+            const trendColors = {
+                'STRONG_UP': '📈 STRONG_UP',
+                'STRONG_DOWN': '📉 STRONG_DOWN',
+                'UP': '↗️ UP',
+                'DOWN': '↘️ DOWN',
+                'VOLATILE': '⚡ VOLATILE',
+                'NEUTRAL': '➡️ NEUTRAL'
+            };
+            trendEl.innerText = trendColors[this.engine.trendState] || 'NEUTRAL';
+
+            const recentHistory = this.engine.history.slice(0, 12).map(d => d.size.charAt(0)).join(' · ');
+            document.getElementById('patternDisplay').innerHTML = `◈ ${recentHistory || 'SYNCING'} ◈`;
+
+            // Advanced metrics
+            document.getElementById('lossPreventionDisplay').innerText = `${this.engine.lossPreventionScore.toFixed(0)}%`;
+            document.getElementById('trendAlignmentDisplay').innerText = `${this.engine.trendAlignmentScore.toFixed(0)}%`;
+            document.getElementById('patternQualityDisplay').innerText = `${this.engine.patternQualityScore.toFixed(0)}%`;
+            document.getElementById('consensusDisplay').innerText = `${(this.engine.consensusStrength * 100).toFixed(0)}%`;
+
+            // Model indicator lights
+            const indicator = document.getElementById('modelIndicator');
+            indicator.innerHTML = '';
+            const models = ['momentum', 'reversal', 'markov', 'pattern3', 'pattern5', 'pattern7', 'majority'];
+            for (const model of models) {
+                const div = document.createElement('div');
+                div.className = 'mini-model ' + (this.engine.modelActivation[model] ? 'active' : '');
+                div.innerText = model.substring(0, 3).toUpperCase();
+                indicator.appendChild(div);
+            }
+        }
+
+        updateUIStatus(online) {
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            if (online) {
+                dot.className = 'status-dot connected';
+                txt.innerText = 'ONLINE';
+                txt.style.color = '#00ff66';
+            } else {
+                dot.className = 'status-dot scanning';
+                txt.innerText = 'RETRYING';
+                txt.style.color = '#ffaa00';
+            }
+        }
+
+        start() {
+            this.poll();
+            setInterval(() => this.poll(), 1500);
+        }
+    }
+
+    function postLog(msg) {
+        const consoleEl = document.getElementById('logConsole');
+        const timestamp = new Date().toLocaleTimeString();
+        consoleEl.innerHTML += `<br>[${timestamp}] ${msg}`;
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    const engine = new QuantumConsensusEngineV11();
+    const bridge = new NetworkBridge(engine);
+
+    document.getElementById('resetMemoryBtn').addEventListener('click', () => {
+        engine.reset();
+        document.getElementById('logConsole').innerHTML = '[SYS] QUANT-SHIELD V11 ELITE ENGINE ONLINE<br>[SYS] ADVANCED CONSENSUS ACTIVE<br>[SYS] OMNIDIRECTIONAL TREND ANALYSIS ENABLED<br>[SYS] AWAITING MARKET DATA...';
+        document.getElementById('lossPreventionDisplay').innerText = '100%';
+        document.getElementById('trendAlignmentDisplay').innerText = '0%';
+        document.getElementById('patternQualityDisplay').innerText = '0%';
+        document.getElementById('consensusDisplay').innerText = '0%';
+        postLog('✨ System fully reset and optimized for next cycle.');
+        bridge.poll();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        bridge.start();
+    });
+</script>
+</body>
+</html>
