@@ -1,664 +1,675 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>30S QUANT ENGINE · ULTRA RISK-SHIELD V12 PRO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins','Inter',sans-serif; -webkit-tap-highlight-color:transparent; }
-        html, body { height:100%; width:100%; background-color:#05080e; color: #ffffff; display:flex; justify-content:center; overflow:hidden; }
-        .app-container { width:100%; max-width:480px; height:100%; background:#090d16; display:flex; flex-direction:column; position:relative; box-shadow: 0 0 35px rgba(0,0,0,0.8); border: 1px solid #162032; }
-        .header { padding: 14px 18px; background: #0c1322; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #18263e; }
-        .logo { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; color: #00ffcc; letter-spacing: 0.5px; text-shadow: 0 0 8px rgba(0,255,204,0.3); }
-        .api-status { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; background: #05080e; padding: 4px 10px; border-radius: 20px; border: 1px solid #18263e; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3333; animation: pulse 1s infinite; }
-        .status-dot.connected { background: #00ff66; box-shadow: 0 0 12px #00ff66; }
-        .status-dot.scanning { background: #ffaa00; box-shadow: 0 0 12px #ffaa00; animation: pulse 0.6s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .main-content { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-        .display-card { background: linear-gradient(145deg, #0e1726, #070c14); border-radius: 18px; padding: 20px 16px; text-align: center; border: 2px solid #1a2a45; position: relative; box-shadow: 0 0 20px rgba(0,255,204,0.1); }
-        .label { font-size: 10px; color: #6b82a6; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
-        .period-info { font-family: 'Orbitron', monospace; font-size: 11px; color: #ffaa00; margin-bottom: 4px; letter-spacing: 1px; }
-        .prediction-value { font-size: 56px; font-weight: 900; font-family: 'Orbitron', sans-serif; color: #ffffff; margin: 8px 0; line-height: 1; animation: bounce 0.4s ease-in-out; }
-        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        .prediction-value.big { color: #ffaa00; text-shadow: 0 0 30px rgba(255,170,0,0.6); }
-        .prediction-value.small { color: #00ccff; text-shadow: 0 0 30px rgba(0,204,255,0.6); }
-        .pattern-stream { font-size: 10px; color: #00ffcc; margin-top: 6px; font-family: 'Courier New', monospace; letter-spacing: 1px; opacity: 0.95; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .stat-box { background: #0c1322; border-radius: 14px; padding: 12px 8px; border: 1px solid #18263e; text-align: center; }
-        .stat-val { font-size: 13px; font-weight: 700; font-family: 'Orbitron', sans-serif; margin-top: 4px; }
-        .engine-logs { background: #030509; border-radius: 12px; padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 9px; color: #7a92b8; height: 120px; overflow-y: auto; border: 1px solid #0f192b; text-align: left; line-height: 1.6; }
-        .btn-action { background: linear-gradient(135deg, #00ffcc 0%, #00bfff 100%); color: #05080e; border: none; padding: 14px; border-radius: 14px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; width: 100%; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
-        .btn-action:active { transform: scale(0.95); }
-        .btn-action:hover { box-shadow: 0 0 20px rgba(0,255,204,0.4); }
-        .btn-danger { background: linear-gradient(135deg, #ff3333 0%, #cc0000 100%); color: #ffffff; }
-        .warning-banner { background: rgba(0, 255, 102, 0.12); border: 1.5px solid rgba(0, 255, 102, 0.4); padding: 10px 12px; border-radius: 10px; font-size: 10px; color: #00ff99; text-align: center; font-weight: 600; }
-        .stats-row { display: flex; gap: 10px; margin-top: 8px; }
-        .stat-mini { flex: 1; background: #0c1322; border-radius: 10px; padding: 10px 6px; border: 1px solid #18263e; font-size: 9px; color: #6b82a6; }
-        .stat-mini-val { font-size: 15px; font-weight: 700; color: #00ff66; margin-top: 4px; }
-        .trend-indicator { font-size: 11px; color: #00ffcc; margin-top: 6px; font-weight: 600; }
-        .confidence-bar { background: #0c1322; border-radius: 4px; height: 5px; margin-top: 10px; overflow: hidden; border: 1px solid #18263e; }
-        .confidence-fill { background: linear-gradient(90deg, #00ff66, #00ffcc); height: 100%; transition: width 0.4s ease-out; box-shadow: 0 0 10px rgba(0,255,102,0.5); }
-        .model-indicator { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; }
-        .mini-model { width: 100%; aspect-ratio: 1; border-radius: 4px; background: #0c1322; border: 1px solid #18263e; font-size: 7px; display: flex; align-items: center; justify-content: center; color: #6b82a6; font-weight: 600; }
-        .mini-model.active { background: #1a3f3a; color: #00ff66; border-color: #00ff66; box-shadow: 0 0 8px rgba(0,255,102,0.3); }
-        .advanced-metrics { background: rgba(0,255,102,0.08); border: 1px solid rgba(0,255,102,0.2); border-radius: 10px; padding: 10px; margin-top: 8px; }
-        .metric-item { display: flex; justify-content: space-between; font-size: 9px; color: #6b82a6; margin: 4px 0; }
-        .metric-val { color: #00ff66; font-weight: 600; }
-        .alert-success { background: rgba(0, 255, 102, 0.15); border: 1px solid #00ff66; padding: 8px; border-radius: 8px; margin: 8px 0; color: #00ff99; font-size: 9px; }
-        .alert-danger { background: rgba(255, 51, 51, 0.15); border: 1px solid #ff3333; padding: 8px; border-radius: 8px; margin: 8px 0; color: #ff6666; font-size: 9px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>QUANT SHIELD — ADAPTIVE PATTERN ENGINE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --bg:#040a12;
+      --bg-2:#071420;
+      --panel:#0c1828;
+      --panel-2:#0e1f33;
+      --stroke:#1a3558;
+      --good:#18f0b5;
+      --good-2:#00d9ff;
+      --warn:#ffb11a;
+      --bad:#ff5d73;
+      --text:#edf7ff;
+      --muted:#7ea2c7;
+      --shadow: rgba(0,0,0,0.55);
+    }
+    * { box-sizing:border-box; }
+    html,body {
+      margin:0; padding:0; height:100%; width:100%;
+      background: linear-gradient(135deg, #040a12 0%, #081421 100%);
+      color:var(--text); font-family:'Inter',sans-serif;
+      overflow:hidden;
+    }
+    body { display:flex; align-items:center; justify-content:center; }
+    .app {
+      width:min(100%, 520px); height:100%; max-height:100vh;
+      background:linear-gradient(180deg, rgba(7,18,31,0.98), rgba(5,11,18,0.98));
+      border:1px solid var(--stroke);
+      box-shadow:0 35px 80px rgba(0,0,0,0.8);
+      position:relative; overflow:hidden;
+    }
+    .header {
+      height:60px; display:flex; align-items:center; justify-content:space-between;
+      padding:0 16px; background:rgba(11,21,34,0.9); border-bottom:1px solid rgba(26,53,88,0.7);
+    }
+    .logo {
+      font-family:'Orbitron',sans-serif; font-weight:900; letter-spacing:1px;
+      background:linear-gradient(90deg, var(--good), var(--good-2));
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      font-size:15px;
+    }
+    .api-status {
+      display:flex; align-items:center; gap:8px; padding:7px 10px;
+      border-radius:999px; border:1px solid rgba(24,240,181,0.5); background:rgba(8,18,24,0.9);
+      font-size:11px; font-weight:700; color:var(--good); letter-spacing:0.08em; text-transform:uppercase;
+    }
+    .dot {
+      width:10px; height:10px; border-radius:50%; background:#ff4d5d;
+      box-shadow:0 0 12px rgba(255,77,93,0.6); animation:pulse 1s infinite;
+    }
+    .dot.live { background:#19f0b5; box-shadow:0 0 18px rgba(25,240,181,0.9); }
+    .dot.retry { background:#ffb11a; box-shadow:0 0 18px rgba(255,177,26,0.9); }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
+    .content {
+      height:calc(100% - 60px); overflow-y:auto; padding:14px 14px 20px;
+    }
+    .banner {
+      padding:10px 12px; border:1px solid rgba(25,240,181,0.35); border-radius:12px;
+      background:rgba(10,31,31,0.45); color:var(--good); font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; text-align:center;
+      margin-bottom:12px;
+    }
+    .card {
+      background:linear-gradient(180deg, rgba(14,25,37,1), rgba(9,16,24,1)); border:1px solid var(--stroke);
+      border-radius:18px; padding:16px 14px 12px; box-shadow:inset 0 0 28px rgba(0,0,0,0.28);
+    }
+    .period {
+      text-align:center; font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--warn); margin-bottom:10px; font-weight:800;
+    }
+    .label {
+      text-align:center; margin-bottom:6px; letter-spacing:0.18em; font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;
+    }
+    .prediction {
+      font-size:60px; line-height:1; margin:0 auto 8px; text-align:center;
+      font-family:'Orbitron',sans-serif; font-weight:900; letter-spacing:1px; text-shadow:0 0 24px rgba(255,255,255,0.12);
+      transition:all .2s ease;
+    }
+    .prediction.big { color:#ffca3a; text-shadow:0 0 28px rgba(255,202,58,0.65); }
+    .prediction.small { color:#44d6ff; text-shadow:0 0 28px rgba(68,214,255,0.65); }
+    .pattern-strip {
+      text-align:center; color:var(--good); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; font-weight:700;
+      min-height:16px; margin:4px 0 8px;
+    }
+    .trend {
+      text-align:center; color:var(--good-2); font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:8px;
+    }
+    .confidence-bar { height:10px; border-radius:999px; overflow:hidden; background:rgba(6,14,20,0.9); border:1px solid rgba(26,53,88,0.8); }
+    .confidence-fill {
+      height:100%; width:0%; border-radius:inherit; background:linear-gradient(90deg, #1be6a8, #31d5ff, #2a9dff);
+      box-shadow:0 0 16px rgba(49,213,255,0.7); transition:width .25s ease;
+    }
+    .stats-grid {
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:14px;
+    }
+    .stat-box {
+      background:rgba(13,22,31,0.95); border:1px solid rgba(26,53,88,0.8); border-radius:14px; padding:10px 8px; text-align:center;
+    }
+    .stat-box .mini-label {
+      color:var(--muted); text-transform:uppercase; font-size:9px; letter-spacing:0.14em; font-weight:700;
+    }
+    .stat-box .value {
+      margin-top:6px; font-family:'Orbitron',sans-serif; font-weight:800; font-size:17px;
+    }
+    .small-grid {
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:14px;
+    }
+    .mini-box {
+      background:rgba(12,22,33,0.96); border:1px solid rgba(26,53,88,0.8); border-radius:12px; padding:10px 6px; text-align:center;
+    }
+    .mini-box .mini-label { display:block; color:var(--muted); font-size:8px; letter-spacing:0.16em; text-transform:uppercase; }
+    .mini-box .mini-value { margin-top:6px; font-family:'Orbitron',sans-serif; font-weight:800; font-size:15px; }
+    .metrics {
+      margin-top:14px; background:rgba(10,26,36,0.9); border:1px solid rgba(26,53,88,0.8); border-radius:14px; padding:10px 12px;
+    }
+    .metric-row {
+      display:flex; justify-content:space-between; align-items:center; gap:10px; padding:6px 0; font-size:11px; color:var(--muted);
+    }
+    .metric-row + .metric-row { border-top:1px solid rgba(26,53,88,0.7); }
+    .metric-row .metric-value { color:var(--good); font-weight:800; }
+    .log-box {
+      margin-top:14px; background:#02080d; border:1px solid rgba(26,53,88,0.8); border-radius:12px; padding:10px 12px; height:140px;
+      overflow:auto; color:#6b8daf; font-size:10px; line-height:1.6; font-family:'Consolas','monospace';
+      box-shadow:inset 0 0 24px rgba(0,0,0,0.55);
+    }
+    .log-box::-webkit-scrollbar { width:5px; } .log-box::-webkit-scrollbar-thumb { background:#163551; border-radius:999px; }
+    .btn {
+      width:100%; margin-top:14px; border:none; border-radius:14px; padding:14px 16px; font-size:12px; letter-spacing:0.12em; font-weight:900; text-transform:uppercase;
+      cursor:pointer; transition:transform .15s ease, box-shadow .15s ease; color:#04130d; background:linear-gradient(90deg, var(--good), var(--good-2));
+      box-shadow:0 12px 24px rgba(20,230,170,0.18);
+    }
+    .btn:active { transform:translateY(1px) scale(0.995); }
+    .win { color:var(--good); }
+    .loss { color:var(--bad); }
+    .neutral { color:var(--warn); }
+    .warning { color:var(--warn); }
+    @media (max-width:420px) {
+      .prediction { font-size:52px; }
+      .header { padding:0 12px; }
+      .logo { font-size:13px; }
+      .api-status { font-size:10px; }
+    }
+  </style>
 </head>
 <body>
-<div class="app-container">
+  <div class="app">
     <div class="header">
-        <div class="logo">⚡ QUANT-SHIELD v12 PRO</div>
-        <div class="api-status">
-            <div id="statusDot" class="status-dot"></div>
-            <span id="statusText">INIT</span>
-        </div>
+      <div class="logo">QUANT SHIELD</div>
+      <div class="api-status"><span id="statusDot" class="dot"></span><span id="statusText">INIT</span></div>
     </div>
-    <div class="main-content">
-        <div class="warning-banner">
-            🛡️ V12 PRO: Enhanced Market Pattern Detection with Dynamic Loss Prevention & Real-time Signal Fusion
-        </div>
 
-        <div class="display-card">
-            <div class="period-info" id="periodDisplay">⏳ TARGET: ------</div>
-            <div class="label">QUANTUM PREDICTION ENGINE</div>
-            <div id="predictionDisplay" class="prediction-value">•••</div>
-            <div id="patternDisplay" class="pattern-stream">◈ INITIALIZING NEURAL LAYERS ◈</div>
-            <div class="trend-indicator" id="trendDisplay">AWAITING DATA</div>
-            <div class="confidence-bar">
-                <div id="confidenceBar" class="confidence-fill" style="width: 0%"></div>
-            </div>
-            <div class="model-indicator" id="modelIndicator"></div>
-        </div>
+    <div class="content">
+      <div class="banner">Adaptive pattern fusion • volatility trap guard • anti-loss gate</div>
 
-        <div class="stats-grid">
-            <div class="stat-box"><div class="label">WIN RATE</div><div id="winRateDisplay" class="stat-val" style="color:#00ff66;">--%</div></div>
-            <div class="stat-box"><div class="label">ACCURACY</div><div id="accuracyDisplay" class="stat-val" style="color:#00ffcc;">--%</div></div>
-            <div class="stat-box"><div class="label">STREAK</div><div id="streakDisplay" class="stat-val" style="color:#ffaa00;">0</div></div>
-        </div>
+      <div class="card">
+        <div class="period" id="periodDisplay">TARGET • ----</div>
+        <div class="label">Prediction Engine</div>
+        <div id="predictionDisplay" class="prediction">--</div>
+        <div id="patternDisplay" class="pattern-strip">Initializing signal map...</div>
+        <div id="trendDisplay" class="trend">Awaiting data</div>
+        <div class="confidence-bar"><div id="confidenceFill" class="confidence-fill"></div></div>
+      </div>
 
-        <div class="stats-row">
-            <div class="stat-mini"><div class="label">WINS</div><div id="winsDisplay" class="stat-mini-val">0</div></div>
-            <div class="stat-mini"><div class="label">LOSSES</div><div id="lossesDisplay" class="stat-mini-val">0</div></div>
-            <div class="stat-mini"><div class="label">CONFIDENCE</div><div id="confDisplay" class="stat-mini-val">0%</div></div>
-        </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="mini-label">Win Rate</div><div id="winRate" class="value win">--%</div></div>
+        <div class="stat-box"><div class="mini-label">Accuracy</div><div id="accuracy" class="value win">--%</div></div>
+        <div class="stat-box"><div class="mini-label">Streak</div><div id="streak" class="value neutral">--</div></div>
+      </div>
 
-        <div class="advanced-metrics">
-            <div class="metric-item"><span>Market Pattern:</span><span id="marketPatternDisplay" class="metric-val">ANALYZING</span></div>
-            <div class="metric-item"><span>Signal Strength:</span><span id="signalStrengthDisplay" class="metric-val">0%</span></div>
-            <div class="metric-item"><span>Loss Prevention:</span><span id="lossPreventionDisplay" class="metric-val">100%</span></div>
-            <div class="metric-item"><span>Pattern Quality:</span><span id="patternQualityDisplay" class="metric-val">0%</span></div>
-        </div>
+      <div class="small-grid">
+        <div class="mini-box"><span class="mini-label">Wins</span><span id="winsDisplay" class="mini-value win">0</span></div>
+        <div class="mini-box"><span class="mini-label">Losses</span><span id="lossesDisplay" class="mini-value loss">0</span></div>
+        <div class="mini-box"><span class="mini-label">Conf</span><span id="confDisplay" class="mini-value">0%</span></div>
+      </div>
 
-        <div class="label" style="margin-bottom: -4px;">📊 ENGINE DIAGNOSTICS</div>
-        <div class="engine-logs" id="logConsole">
-            [SYS] QUANT-SHIELD V12 PRO ENGINE ONLINE<br>[SYS] ENHANCED PATTERN DETECTION ACTIVE<br>[SYS] MARKET ANALYSIS ENABLED<br>[SYS] AWAITING MARKET DATA...
-        </div>
+      <div class="metrics">
+        <div class="metric-row"><span>Market Phase</span><span id="marketPhase" class="metric-value">INIT</span></div>
+        <div class="metric-row"><span>Signal Strength</span><span id="signalStrength" class="metric-value">0%</span></div>
+        <div class="metric-row"><span>Pattern Quality</span><span id="patternQuality" class="metric-value">0%</span></div>
+        <div class="metric-row"><span>Loss Guard</span><span id="lossGuard" class="metric-value">ON</span></div>
+      </div>
 
-        <button class="btn-action" id="resetMemoryBtn"><i class="fa-solid fa-sync"></i> RESET & OPTIMIZE</button>
+      <div class="log-box" id="logConsole"></div>
+      <button class="btn" id="resetBtn">Reset & optimize</button>
     </div>
-</div>
+  </div>
 
 <script>
-    // ============================================================
-    // QUANT-SHIELD V12 PRO - ENHANCED MARKET PATTERN DETECTION
-    // ============================================================
-    
-    class MarketPatternDetector {
-        constructor() {
-            this.patterns = {
-                alternating: 0,
-                uptrend: 0,
-                downtrend: 0,
-                doublePattern: 0,
-                triplePattern: 0,
-                reversal: 0,
-                momentum: 0
-            };
-            this.patternHistory = [];
-            this.lastResult = null;
-        }
+  const clamp = (v,min,max)=>Math.min(max,Math.max(min,v));
+  const mean = arr => arr.length ? arr.reduce((s,v)=>s+v,0)/arr.length : 0;
+  const toBit = s => s === 'BIG' ? 1 : 0;
+  const opposite = s => s === 'BIG' ? 'SMALL' : 'BIG';
 
-        analyzeMarketPatterns(data) {
-            if (data.length < 4) return null;
+  function logIt(msg,type='info') {
+    const box = document.getElementById('logConsole');
+    const time = new Date().toLocaleTimeString();
+    const cls = type === 'loss' ? 'loss' : type === 'win' ? 'win' : type === 'warn' ? 'warning' : 'neutral';
+    box.innerHTML += `<div class="${cls}">[${time}] ${msg}</div>`;
+    box.scrollTop = box.scrollHeight;
+  }
 
-            const recent = data.slice(0, 20);
-            const sizes = recent.map(d => d.size);
-            
-            let analysis = {
-                alternatingScore: this._detectAlternating(sizes),
-                uptrendScore: this._detectUptrend(sizes),
-                downtrendScore: this._detectDowntrend(sizes),
-                doubleScore: this._detectDoublePattern(sizes),
-                tripleScore: this._detectTriplePattern(sizes),
-                reversalScore: this._detectReversal(sizes),
-                momentumScore: this._detectMomentum(sizes)
-            };
-
-            return analysis;
-        }
-
-        _detectAlternating(sizes) {
-            let alternating = 0;
-            for (let i = 0; i < Math.min(sizes.length - 1, 12); i++) {
-                if (sizes[i] !== sizes[i + 1]) {
-                    alternating++;
-                }
-            }
-            return (alternating / Math.min(sizes.length - 1, 12)) * 100;
-        }
-
-        _detectUptrend(sizes) {
-            const bigCount = sizes.slice(0, 10).filter(s => s === 'BIG').length;
-            return (bigCount / 10) * 100;
-        }
-
-        _detectDowntrend(sizes) {
-            const smallCount = sizes.slice(0, 10).filter(s => s === 'SMALL').length;
-            return (smallCount / 10) * 100;
-        }
-
-        _detectDoublePattern(sizes) {
-            const pattern = sizes[0] + sizes[1];
-            let matches = 0;
-            for (let i = 2; i < Math.min(sizes.length - 1, 14); i += 2) {
-                if ((sizes[i] + sizes[i + 1]) === pattern) matches++;
-            }
-            return (matches / 6) * 100;
-        }
-
-        _detectTriplePattern(sizes) {
-            if (sizes.length < 6) return 0;
-            const pattern = sizes[0] + sizes[1] + sizes[2];
-            let matches = 0;
-            for (let i = 3; i < Math.min(sizes.length - 2, 12); i += 3) {
-                if ((sizes[i] + sizes[i + 1] + sizes[i + 2]) === pattern) matches++;
-            }
-            return (matches / 4) * 100;
-        }
-
-        _detectReversal(sizes) {
-            let reversals = 0;
-            for (let i = 1; i < Math.min(sizes.length - 1, 12); i++) {
-                if (sizes[i - 1] !== sizes[i] && sizes[i] !== sizes[i + 1] && sizes[i - 1] === sizes[i + 1]) {
-                    reversals++;
-                }
-            }
-            return (reversals / Math.min(sizes.length - 2, 11)) * 100;
-        }
-
-        _detectMomentum(sizes) {
-            const first5 = sizes.slice(0, 5).filter(s => s === 'BIG').length;
-            const second5 = sizes.slice(5, 10).filter(s => s === 'BIG').length;
-            const momentum = Math.abs(first5 - second5) * 20;
-            return Math.min(momentum, 100);
-        }
-
-        predictNextSignal(data, patterns) {
-            if (data.length < 3) return 'BIG';
-
-            const recent = data.slice(0, 3).map(d => d.size);
-            const highestPattern = Object.entries(patterns)
-                .sort(([,a], [,b]) => b - a)[0];
-
-            let prediction = 'BIG';
-
-            if (highestPattern[0] === 'alternatingScore' && highestPattern[1] > 75) {
-                prediction = recent[0] === 'BIG' ? 'SMALL' : 'BIG';
-            } else if (highestPattern[0] === 'uptrendScore' && highestPattern[1] > 70) {
-                prediction = 'BIG';
-            } else if (highestPattern[0] === 'downtrendScore' && highestPattern[1] > 70) {
-                prediction = 'SMALL';
-            } else if (highestPattern[0] === 'doubleScore' && highestPattern[1] > 80) {
-                prediction = recent[1] === 'BIG' ? 'BIG' : 'SMALL';
-            } else if (highestPattern[0] === 'tripleScore' && highestPattern[1] > 75) {
-                prediction = recent[2] === 'BIG' ? 'BIG' : 'SMALL';
-            }
-
-            return prediction;
-        }
+  class PatternDetector {
+    constructor() {
+      this.weights = {
+        trend:1.34,
+        alternation:1.22,
+        streak:1.35,
+        reversal:1.18,
+        momentum:1.24,
+        frequency:1.26,
+        repeat2:1.12,
+        repeat3:1.16,
+        volatility:0.96,
+        run:1.28
+      };
     }
 
-    class QuantumConsensusEngineV12 {
-        constructor() {
-            this.history = [];
-            this.predictions = [];
-            this.maxLen = 600;
-            this.wins = 0;
-            this.losses = 0;
-            this.lastPrediction = null;
-            this.lastPeriod = null;
-            this.consecutiveLosses = 0;
-            this.consecutiveWins = 0;
-            this.lastLossSignal = null;
-            this.lossPreventionActive = false;
-            
-            this.patternDetector = new MarketPatternDetector();
-            this.marketPatterns = null;
-            this.currentTrend = 'NEUTRAL';
-            this.signalStrength = 0;
-            this.patternQuality = 0;
-            this.lossPreventionScore = 100;
-            
-            this.adaptiveWeights = {
-                alternating: 2.8,
-                uptrend: 3.2,
-                downtrend: 3.2,
-                doublePattern: 2.6,
-                triplePattern: 2.8,
-                reversal: 2.4,
-                momentum: 3.0
-            };
+    detect(history) {
+      if (!history || history.length < 4) return {};
+      const recent = history.slice(0, 80).map(x => x.size);
+      const bits = recent.map(toBit);
+      const out = {};
 
-            this.patternMemory = {};
-            this.failedPatterns = new Set();
+      let cur = 1, best = 1, lastValue = recent[0];
+      for (let i=1; i<recent.length; i++) {
+        if (recent[i] === lastValue) cur++; else { best = Math.max(best, cur); cur = 1; }
+        lastValue = recent[i];
+      }
+      best = Math.max(best, cur);
+      const runSignal = recent[0] || 'BIG';
+      const runStrength = clamp((best - 2) / 6, 0, 1);
+      out.run = { signal: runStrength > 0.22 ? runSignal : null, strength: runStrength, score: runStrength * this.weights.run };
+
+      let alt = 0;
+      for (let i=1; i<Math.min(recent.length, 18); i++) if (recent[i] !== recent[i-1]) alt++;
+      const altRatio = recent.length > 1 ? alt / (Math.min(recent.length, 18) - 1 || 1) : 0;
+      const altSignal = recent[0] === 'BIG' ? 'SMALL' : 'BIG';
+      out.alternation = { signal: altRatio > 0.55 ? altSignal : null, strength: clamp((altRatio - 0.38) / 0.7, 0, 1), score: ((altRatio > 0.55 ? altSignal : null) ? this.weights.alternation * clamp((altRatio - 0.38) / 0.7, 0, 1) : 0) };
+
+      const winSize = Math.min(bits.length, 30);
+      const s1 = mean(bits.slice(0, Math.min(8, winSize)));
+      const s2 = mean(bits.slice(0, Math.min(18, winSize)));
+      const s3 = mean(bits.slice(0, Math.min(30, winSize)));
+      const trendBias = s1 + s2*0.5 + s3*0.3;
+      const trendDir = trendBias > 0.6 ? 'BIG' : trendBias < 0.4 ? 'SMALL' : null;
+      const trendStrength = Math.abs(trendBias - 0.5) * 2.2;
+      out.trend = { signal: trendDir, strength: clamp(trendStrength, 0, 1), score: trendDir ? this.weights.trend * clamp(trendStrength, 0, 1) : 0 };
+
+      let reversalHits = 0;
+      for (let i=1; i<Math.min(recent.length-1, 24); i++) {
+        if (recent[i-1] !== recent[i] && recent[i] !== recent[i+1] && recent[i-1] === recent[i+1]) reversalHits++;
+      }
+      const revRatio = recent.length > 2 ? reversalHits / (Math.min(recent.length-2, 24) || 1) : 0;
+      const revSignal = recent[0] === 'BIG' ? 'SMALL' : 'BIG';
+      out.reversal = { signal: revRatio > 0.26 ? revSignal : null, strength: clamp(revRatio / 0.4, 0, 1), score: (revRatio > 0.26 ? this.weights.reversal * clamp(revRatio / 0.4, 0, 1) : 0) };
+
+      const wShort = mean(bits.slice(0, 5));
+      const wMid = mean(bits.slice(0, 10));
+      const momentumBias = wShort - wMid;
+      const momentumSignal = momentumBias > 0 ? 'BIG' : momentumBias < 0 ? 'SMALL' : null;
+      const momentumStrength = Math.abs(momentumBias) * 2.5;
+      out.momentum = { signal: momentumSignal, strength: clamp(momentumStrength, 0, 1), score: momentumSignal ? this.weights.momentum * clamp(momentumStrength, 0, 1) : 0 };
+
+      const freqBias = mean(bits.slice(0, 18));
+      const freqForce = Math.abs(freqBias - 0.5) * 2.2;
+      const freqSignal = freqBias > 0.5 ? 'BIG' : 'SMALL';
+      out.frequency = { signal: freqForce > 0.12 ? freqSignal : null, strength: clamp(freqForce, 0, 1), score: (freqForce > 0.12 ? this.weights.frequency * clamp(freqForce, 0, 1) : 0) };
+
+      if (recent.length >= 6) {
+        const seq2 = recent.slice(0, 2).join('|');
+        let seqMatches2 = 0, nextBig2 = 0, nextSmall2 = 0;
+        for (let i=2; i<recent.length-1; i++) {
+          if (recent.slice(i, i+2).join('|') === seq2) {
+            seqMatches2++;
+            if (recent[i+1] === 'BIG') nextBig2++; else nextSmall2++;
+          }
         }
+        const p2 = seqMatches2 > 0 ? nextBig2 / (nextBig2 + nextSmall2 || 1) : 0.5;
+        const sig2 = p2 > 0.55 ? 'BIG' : p2 < 0.45 ? 'SMALL' : null;
+        const strength2 = Math.abs(p2 - 0.5) * 2.4;
+        out.repeat2 = { signal: sig2, strength: clamp(strength2, 0, 1), score: sig2 ? this.weights.repeat2 * clamp(strength2, 0, 1) : 0 };
 
-        insert(node) {
-            if (this.history.length > 0 && this.history[0].period === node.period) {
-                return false;
-            }
-
-            // Evaluate previous prediction
-            if (this.lastPrediction && this.predictions.length > 0) {
-                const lastPred = this.predictions[this.predictions.length - 1];
-                const actual = node.size;
-                
-                if (lastPred.signal === actual) {
-                    this.wins++;
-                    this.consecutiveLosses = 0;
-                    this.consecutiveWins++;
-                    this.lossPreventionScore = Math.min(100, this.lossPreventionScore + 10);
-                    postLog(`✅ WIN #${this.wins}: Predicted ${actual}`);
-                } else {
-                    this.losses++;
-                    this.consecutiveLosses++;
-                    this.consecutiveWins = 0;
-                    this.lastLossSignal = lastPred.signal;
-                    this.lossPreventionScore = Math.max(40, this.lossPreventionScore - 20);
-                    postLog(`❌ LOSS #${this.losses}: Predicted ${lastPred.signal}, got ${actual}`);
-                    
-                    if (this.consecutiveLosses >= 1) {
-                        this.lossPreventionActive = true;
-                        postLog(`🛡️ LOSS PREVENTION MODE ACTIVATED`);
-                    }
-                }
-            }
-
-            this.history.unshift(node);
-            if (this.history.length > this.maxLen) this.history.pop();
-            
-            this._updateMarketTrend();
-            return true;
+        const seq3 = recent.slice(0, 3).join('|');
+        let seqMatches3 = 0, nextBig3 = 0, nextSmall3 = 0;
+        for (let i=3; i<recent.length-1; i++) {
+          if (recent.slice(i, i+3).join('|') === seq3) {
+            seqMatches3++;
+            if (recent[i+2] === 'BIG') nextBig3++; else nextSmall3++;
+          }
         }
+        const p3 = seqMatches3 > 0 ? nextBig3 / (nextBig3 + nextSmall3 || 1) : 0.5;
+        const sig3 = p3 > 0.55 ? 'BIG' : p3 < 0.45 ? 'SMALL' : null;
+        const strength3 = Math.abs(p3 - 0.5) * 2.5;
+        out.repeat3 = { signal: sig3, strength: clamp(strength3, 0, 1), score: sig3 ? this.weights.repeat3 * clamp(strength3, 0, 1) : 0 };
+      }
 
-        _updateMarketTrend() {
-            if (this.history.length < 5) {
-                this.currentTrend = 'NEUTRAL';
-                return;
-            }
+      let changes = 0;
+      for (let i=1; i<Math.min(bits.length, 24); i++) if (bits[i] !== bits[i-1]) changes++;
+      const volatility = changes / (Math.min(bits.length, 24) - 1 || 1);
+      out.volatility = { signal: volatility > 0.7 ? 'FLIP' : null, strength: clamp(volatility, 0, 1), score: volatility > 0.7 ? this.weights.volatility * clamp(volatility, 0, 1) : 0 };
 
-            this.marketPatterns = this.patternDetector.analyzeMarketPatterns(this.history);
-            
-            if (!this.marketPatterns) {
-                this.currentTrend = 'NEUTRAL';
-                return;
-            }
-
-            const entries = Object.entries(this.marketPatterns).sort((a, b) => b[1] - a[1]);
-            const topPattern = entries[0];
-            
-            if (topPattern[1] > 70) {
-                if (topPattern[0] === 'uptrendScore') {
-                    this.currentTrend = 'UPTREND';
-                } else if (topPattern[0] === 'downtrendScore') {
-                    this.currentTrend = 'DOWNTREND';
-                } else if (topPattern[0] === 'alternatingScore') {
-                    this.currentTrend = 'ALTERNATING';
-                } else {
-                    this.currentTrend = 'PATTERNED';
-                }
-                this.patternQuality = topPattern[1];
-            } else {
-                this.currentTrend = 'NEUTRAL';
-                this.patternQuality = 0;
-            }
-        }
-
-        computeSignal(period) {
-            if (this.history.length < 3) {
-                const rnd = Math.random() > 0.5 ? 'BIG' : 'SMALL';
-                this.lastPrediction = rnd;
-                this.lastPeriod = period;
-                this.predictions.push({
-                    period,
-                    signal: rnd,
-                    confidence: 65
-                });
-                return { signal: rnd, confidence: '65.0' };
-            }
-
-            let signal = 'BIG';
-            let confidence = 0;
-
-            // Pattern-based prediction
-            const patternPrediction = this.patternDetector.predictNextSignal(this.history, this.marketPatterns || {});
-            
-            if (this.lossPreventionActive && this.consecutiveLosses >= 1) {
-                // Loss prevention: flip the prediction
-                signal = this.lastLossSignal === 'BIG' ? 'SMALL' : 'BIG';
-                confidence = 78;
-                postLog(`🔄 LOSS PREVENTION: Flipping to ${signal}`);
-                this.lossPreventionActive = false;
-            } else if (this.currentTrend === 'UPTREND') {
-                signal = 'BIG';
-                confidence = 82;
-            } else if (this.currentTrend === 'DOWNTREND') {
-                signal = 'SMALL';
-                confidence = 82;
-            } else if (this.currentTrend === 'ALTERNATING') {
-                signal = patternPrediction;
-                confidence = 80;
-            } else if (this.currentTrend === 'PATTERNED') {
-                signal = patternPrediction;
-                confidence = 76;
-            } else {
-                // Neutral: use recent majority
-                const recentBig = this.history.slice(0, 8).filter(h => h.size === 'BIG').length;
-                signal = recentBig > 4 ? 'BIG' : 'SMALL';
-                confidence = 72;
-            }
-
-            // Apply confidence modulation based on pattern strength
-            if (this.patternQuality > 0) {
-                confidence = Math.min(95, confidence + (this.patternQuality / 100) * 10);
-            }
-
-            // Boost confidence with consecutive wins
-            if (this.consecutiveWins > 2) {
-                confidence = Math.min(98, confidence + (this.consecutiveWins * 3));
-            }
-
-            this.signalStrength = confidence;
-            this.lastPrediction = signal;
-            this.lastPeriod = period;
-
-            this.predictions.push({
-                period,
-                signal,
-                confidence: Math.round(confidence)
-            });
-
-            if (this.predictions.length > this.maxLen) {
-                this.predictions.shift();
-            }
-
-            return { signal, confidence: confidence.toFixed(1) };
-        }
-
-        getWinRate() {
-            const total = this.wins + this.losses;
-            return total === 0 ? 0 : ((this.wins / total) * 100).toFixed(1);
-        }
-
-        reset() {
-            this.history = [];
-            this.predictions = [];
-            this.wins = 0;
-            this.losses = 0;
-            this.consecutiveLosses = 0;
-            this.consecutiveWins = 0;
-            this.lossPreventionActive = false;
-            this.currentTrend = 'NEUTRAL';
-            this.marketPatterns = null;
-            this.patternQuality = 0;
-            this.lossPreventionScore = 100;
-            this.patternMemory = {};
-            postLog('🔄 V12 ENGINE RESET: Fresh cycle initialized.');
-        }
+      return out;
     }
 
-    // ============================================================
-    // OPTIMIZED NETWORK BRIDGE WITH IMPROVED API HANDLING
-    // ============================================================
-    class NetworkBridge {
-        constructor(engine) {
-            this.engine = engine;
+    generateSignal(history, previousPrediction, previousOutcome, consecutiveLosses) {
+      if (!history || history.length < 3) return { signal:'BIG', confidence:66 };
+      const analysis = this.detect(history);
+      const votes = { BIG:0, SMALL:0 };
+      const names = Object.keys(analysis);
+      names.forEach(name => {
+        const item = analysis[name];
+        if (!item || !item.signal) return;
+        votes[item.signal] += item.score || 0;
+      });
+
+      const overallBias = mean(history.slice(0, 18).map(x => x.size === 'BIG' ? 1 : 0));
+      const baseSignal = votes.BIG >= votes.SMALL ? 'BIG' : 'SMALL';
+      let signal = baseSignal;
+      let confidence = 58 + Math.abs(votes.BIG - votes.SMALL) * 4 + Math.abs(overallBias - 0.5) * 30;
+
+      if (analysis.alternation && analysis.alternation.signal) {
+        signal = analysis.alternation.signal;
+        confidence = Math.max(confidence, 72);
+      }
+
+      if (analysis.trend && analysis.trend.signal && analysis.trend.strength > 0.32) {
+        signal = analysis.trend.signal;
+        confidence = Math.max(confidence, 78);
+      }
+
+      if (previousOutcome === 'LOSS' && previousPrediction && previousPrediction === signal) {
+        const flipped = opposite(signal);
+        signal = flipped;
+        confidence = Math.max(confidence, 74);
+      }
+
+      if (consecutiveLosses >= 1 && previousPrediction && previousPrediction === signal) {
+        signal = opposite(signal);
+        confidence = Math.max(confidence, 72);
+      }
+
+      if (!names.length || Math.abs(votes.BIG - votes.SMALL) < 0.1) {
+        signal = overallBias >= 0.5 ? 'BIG' : 'SMALL';
+        confidence = clamp(confidence, 60, 72);
+      }
+
+      confidence = clamp(Math.round(confidence), 58, 97);
+      return { signal, confidence, analysis };
+    }
+  }
+
+  class AdaptiveEngine {
+    constructor() {
+      this.history = [];
+      this.predictions = [];
+      this.detector = new PatternDetector();
+      this.lastPrediction = null;
+      this.lastOutcome = null;
+      this.consecutiveWins = 0;
+      this.consecutiveLosses = 0;
+      this.wins = 0;
+      this.losses = 0;
+      this.marketPhase = 'INITIALIZING';
+      this.signalStrength = 0;
+      this.patternQuality = 0;
+      this.lossGuard = true;
+      this.lastPeriod = null;
+      this.maxHistory = 300;
+    }
+
+    insert(record) {
+      if (!record || !record.period) return false;
+      if (this.history.length && this.history[0].period === record.period) return false;
+
+      if (this.lastPrediction && this.predictions.length) {
+        const prior = this.predictions[this.predictions.length - 1];
+        const actual = record.size;
+        const hit = prior.signal === actual;
+
+        if (hit) {
+          this.wins += 1;
+          this.consecutiveWins += 1;
+          this.consecutiveLosses = 0;
+          this.lastOutcome = 'WIN';
+          logIt(`✅ WIN #${this.wins}: predicted ${prior.signal} and market returned ${actual}`, 'win');
+        } else {
+          this.losses += 1;
+          this.consecutiveLosses += 1;
+          this.consecutiveWins = 0;
+          this.lastOutcome = 'LOSS';
+          logIt(`❌ LOSS #${this.losses}: predicted ${prior.signal} but market returned ${actual}`, 'loss');
+        }
+      }
+
+      this.history.unshift(record);
+      if (this.history.length > this.maxHistory) this.history.pop();
+
+      this._updateMarketPhase();
+      return true;
+    }
+
+    _updateMarketPhase() {
+      if (!this.history.length) {
+        this.marketPhase = 'INIT';
+        this.patternQuality = 0;
+        return;
+      }
+      const recent = this.history.slice(0, 20);
+      const bits = recent.map(x => x.size === 'BIG' ? 1 : 0);
+      const bigRatio = mean(bits);
+      const changes = bits.slice(1).filter((v, i) => v !== bits[i]).length;
+      const volatility = changes / Math.max(1, bits.length - 1);
+
+      if (bigRatio > 0.62) this.marketPhase = 'UPTREND';
+      else if (bigRatio < 0.38) this.marketPhase = 'DOWNTREND';
+      else if (volatility > 0.6) this.marketPhase = 'ALTERNATING';
+      else this.marketPhase = 'PATTERNED';
+
+      this.patternQuality = clamp(Math.round((Math.abs(bigRatio - 0.5) * 2 + volatility * 100) / 2), 0, 100);
+      this.lossGuard = true;
+    }
+
+    computeSignal(period) {
+      const next = this.detector.generateSignal(this.history, this.lastPrediction, this.lastOutcome, this.consecutiveLosses);
+      const signal = next.signal;
+      const confidence = next.confidence;
+      this.signalStrength = confidence;
+      this.lastPrediction = signal;
+      this.lastPeriod = period;
+      this.predictions.push({ period, signal, confidence, analysis: next.analysis || {} });
+      if (this.predictions.length > this.maxHistory) this.predictions.shift();
+      logIt(`🔮 ${signal} • ${confidence}% • target ${period}`, 'info');
+      return { signal, confidence }; 
+    }
+
+    getStats() {
+      const total = this.wins + this.losses;
+      const winRate = total ? ((this.wins / total) * 100).toFixed(1) : '--';
+      const accuracy = total ? ((this.wins / total) * 100).toFixed(1) : '--';
+      const streak = this.consecutiveWins > 0 ? `W${this.consecutiveWins}` : this.consecutiveLosses > 0 ? `L${this.consecutiveLosses}` : '--';
+      return { winRate, accuracy, streak, wins:this.wins, losses:this.losses, total };
+    }
+
+    reset() {
+      this.history = [];
+      this.predictions = [];
+      this.lastPrediction = null;
+      this.lastOutcome = null;
+      this.consecutiveWins = 0;
+      this.consecutiveLosses = 0;
+      this.wins = 0;
+      this.losses = 0;
+      this.marketPhase = 'INITIALIZING';
+      this.signalStrength = 0;
+      this.patternQuality = 0;
+      this.lossGuard = true;
+      this.lastPeriod = null;
+      logIt('🔄 Engine reset complete. Fresh pattern scan started.', 'info');
+    }
+  }
+
+  class NetworkBridge {
+    constructor(engine) {
+      this.engine = engine;
+      this.isPolling = false;
+      this.retry = 0;
+      this.timeout = 6500;
+      this.baseUrls = [
+        'https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?pageSize=100&pageNo=1&_t=' + Date.now(),
+        'https://bet.8bgame.net/WinGo/WinGo_30S/GetHistoryIssuePage.json?pageSize=100&pageNo=1&_t=' + Date.now(),
+        'https://lottery.ubet365.net/api/history/wingo30s?page=1&pageSize=100&_t=' + Date.now(),
+        'https://wingo.live/api/lottery/history?game=wingo30&page=1&_t=' + Date.now(),
+        'https://api.wingo.zone/history/wingo30s?page=1&limit=100&_t=' + Date.now()
+      ];
+    }
+
+    async fetchJSON(url) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), this.timeout);
+      try {
+        const response = await fetch(url, {
+          method:'GET',
+          mode:'cors',
+          cache:'no-store',
+          headers:{'Accept':'application/json,text/javascript,*/*','User-Agent':'Mozilla/5.0'},
+          signal:ctrl.signal
+        });
+        const text = await response.text();
+        try { return JSON.parse(text); }
+        catch {
+          const match = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+          if (match) {
+            try { return JSON.parse(match[0]); } catch (e) {}
+          }
+          const callback = text.match(/\w+\((\{[\s\S]*\})\)/);
+          if (callback && callback[1]) {
+            try { return JSON.parse(callback[1]); } catch (e) {}
+          }
+          return null;
+        }
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    extractRecords(payload) {
+      let candidates = [];
+      if (!payload) return [];
+      if (Array.isArray(payload)) candidates.push(payload);
+      if (payload.data) {
+        if (Array.isArray(payload.data.list)) candidates.push(payload.data.list);
+        if (Array.isArray(payload.data.records)) candidates.push(payload.data.records);
+        if (Array.isArray(payload.data.histories)) candidates.push(payload.data.histories);
+      }
+      if (Array.isArray(payload.records)) candidates.push(payload.records);
+      if (Array.isArray(payload.list)) candidates.push(payload.list);
+      if (!candidates.length) {
+        for (const key in payload) {
+          if (Array.isArray(payload[key])) { candidates.push(payload[key]); break; }
+        }
+      }
+
+      const out = [];
+      const periodKeys = ['issueNumber','issue','periodNumber','period','expect','expectNo','draw_id','id','issueNo','issueNoStr'];
+      const numberKeys = ['number','openNumber','result','open','code','value','open_num','result_num','num','open_code','winNumber','last_code','openNumberStr'];
+
+      for (const arr of candidates) {
+        for (const item of arr) {
+          if (!item) continue;
+          let period = null;
+          for (const key of periodKeys) {
+            if (item[key] != null) { period = String(item[key]); break; }
+          }
+          let number = null;
+          for (const key of numberKeys) {
+            if (item[key] != null) {
+              let raw = item[key];
+              if (Array.isArray(raw)) raw = raw.join('');
+              if (typeof raw === 'string') {
+                const found = raw.match(/\d+/g);
+                raw = found ? found.join('') : raw;
+              }
+              const parsed = Number(raw);
+              if (!Number.isNaN(parsed)) { number = parsed; break; }
+            }
+          }
+
+          if (period && number != null && !Number.isNaN(number)) {
+            const digit = Math.abs(number) % 10;
+            out.push({ period: String(period), number: digit, size: digit >= 5 ? 'BIG' : 'SMALL' });
+          }
+        }
+      }
+
+      const unique = new Map();
+      for (const row of out) unique.set(row.period, row);
+      return Array.from(unique.values()).sort((a,b) => {
+        const A = Number(String(a.period).match(/\d+/g)?.join('') || 0);
+        const B = Number(String(b.period).match(/\d+/g)?.join('') || 0);
+        return B - A;
+      });
+    }
+
+    async pollOnce() {
+      if (this.isPolling) return;
+      this.isPolling = true;
+      let lastError = null;
+
+      for (const url of this.baseUrls) {
+        try {
+          const json = await this.fetchJSON(url);
+          const records = this.extractRecords(json);
+          if (records.length) {
+            const newest = records[0];
+            this.engine.insert(newest);
+            const nextPeriod = (() => {
+              try {
+                return String(BigInt(String(newest.period).replace(/\D/g, '') || '0') + 1n);
+              } catch {
+                return String((Number(newest.period) || 0) + 1);
+              }
+            })();
+            const signal = this.engine.computeSignal(nextPeriod);
+            this.render(signal, nextPeriod);
+            this.setStatus(true);
+            this.retry = 0;
             this.isPolling = false;
-            this.lastDataTimestamp = 0;
-            this.retryCount = 0;
-            this.maxRetries = 3;
+            return;
+          }
+        } catch (err) {
+          lastError = err;
+          logIt(`⚠ API fetch issue: ${err.message || 'network error'}`, 'warn');
         }
+      }
 
-        getEndpoints() {
-            const t = Date.now();
-            return [
-                `https://api.bdg88zf.com/api/webapi/GetEmerdList?gameType=1&language=0&pageNo=1&pageSize=20&typeId=2&_t=${t}`,
-                `https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?_t=${t}`,
-                `https://bet.8bgame.net/WinGo/WinGo_30S/GetHistoryIssuePage.json?_t=${t}`
-            ];
-        }
-
-        async fetchWithTimeout(url, timeoutMs = 3000) {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), timeoutMs);
-            
-            try {
-                const response = await fetch(url, {
-                    signal: controller.signal,
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64)'
-                    }
-                });
-                
-                clearTimeout(timer);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (err) {
-                clearTimeout(timer);
-                throw err;
-            }
-        }
-
-        parseResponse(json) {
-            let items = [];
-            
-            if (json?.data?.list) items = json.data.list;
-            else if (json?.list) items = json.list;
-            else if (Array.isArray(json)) items = json;
-            else return [];
-
-            const results = [];
-
-            for (const item of items) {
-                try {
-                    let period = item.issueNumber || item.issue || item.periodNumber || item.period || item.expect_code;
-                    let num = parseInt(item.number ?? item.openNumber ?? item.result ?? item.result_value ?? 0);
-
-                    if (period && !isNaN(num) && num >= 0 && num <= 9) {
-                        results.push({
-                            period: String(period),
-                            number: num,
-                            size: num >= 5 ? 'BIG' : 'SMALL'
-                        });
-                    }
-                } catch (e) {
-                    continue;
-                }
-            }
-
-            return results;
-        }
-
-        async poll() {
-            if (this.isPolling) return;
-            this.isPolling = true;
-
-            const endpoints = this.getEndpoints();
-            let rawData = null;
-            let success = false;
-
-            for (const url of endpoints) {
-                try {
-                    const response = await this.fetchWithTimeout(url);
-                    if (response) {
-                        rawData = response;
-                        success = true;
-                        this.retryCount = 0;
-                        break;
-                    }
-                } catch (err) {
-                    postLog(`⚠️ API Endpoint failed: ${err.message}`);
-                    continue;
-                }
-            }
-
-            if (rawData) {
-                const parsed = this.parseResponse(rawData);
-                if (parsed.length > 0) {
-                    this.updateUIStatus(true);
-                    this.processData(parsed);
-                } else {
-                    this.updateUIStatus(false);
-                    postLog('⚠️ No valid data in response');
-                }
-            } else {
-                this.updateUIStatus(false);
-                this.retryCount++;
-                postLog(`⚠️ All endpoints failed (Retry ${this.retryCount}/${this.maxRetries})`);
-            }
-
-            this.isPolling = false;
-        }
-
-        processData(records) {
-            records.sort((a, b) => {
-                try { return Number(BigInt(b.period) - BigInt(a.period)); }
-                catch { return String(b.period).localeCompare(String(a.period)); }
-            });
-
-            const latest = records[0];
-            if (!latest) return;
-
-            const updated = this.engine.insert(latest);
-            if (updated) {
-                let nextPeriod;
-                try { nextPeriod = String(BigInt(latest.period) + 1n); }
-                catch { nextPeriod = String(parseInt(latest.period) + 1); }
-
-                const result = this.engine.computeSignal(nextPeriod);
-                this.renderUI(nextPeriod, result.signal, result.confidence);
-            }
-        }
-
-        renderUI(period, signal, confidence) {
-            document.getElementById('periodDisplay').innerHTML = `⏳ TARGET: #${period.slice(-8)}`;
-            const displayEl = document.getElementById('predictionDisplay');
-            displayEl.innerText = signal;
-            displayEl.className = `prediction-value ${signal.toLowerCase()}`;
-
-            // Update statistics
-            document.getElementById('winRateDisplay').innerText = `${this.engine.getWinRate()}%`;
-            document.getElementById('winsDisplay').innerText = this.engine.wins;
-            document.getElementById('lossesDisplay').innerText = this.engine.losses;
-            document.getElementById('confDisplay').innerText = `${Math.round(confidence)}%`;
-
-            // Confidence bar
-            document.getElementById('confidenceBar').style.width = `${confidence}%`;
-
-            // Calculate accuracy
-            const total = this.engine.wins + this.engine.losses;
-            if (total > 0) {
-                const accuracy = ((this.engine.wins / total) * 100).toFixed(1);
-                document.getElementById('accuracyDisplay').innerText = `${accuracy}%`;
-            }
-
-            // Streak display
-            let streak = this.engine.consecutiveWins > 0 ? `🔥 W${this.engine.consecutiveWins}` : 
-                         this.engine.consecutiveLosses > 0 ? `❄️ L${this.engine.consecutiveLosses}` : 'NEUTRAL';
-            document.getElementById('streakDisplay').innerText = streak;
-
-            // Market pattern display
-            document.getElementById('marketPatternDisplay').innerText = this.engine.currentTrend;
-            document.getElementById('signalStrengthDisplay').innerText = `${Math.round(this.engine.signalStrength)}%`;
-            document.getElementById('lossPreventionDisplay').innerText = `${Math.round(this.engine.lossPreventionScore)}%`;
-            document.getElementById('patternQualityDisplay').innerText = `${this.engine.patternQuality.toFixed(0)}%`;
-
-            // Recent pattern display
-            const recentHistory = this.engine.history.slice(0, 12).map(d => d.size.charAt(0)).join(' · ');
-            document.getElementById('patternDisplay').innerHTML = `◈ ${recentHistory || 'SYNCING'} ◈`;
-
-            // Model indicator
-            const indicator = document.getElementById('modelIndicator');
-            indicator.innerHTML = '';
-            const models = ['uptrend', 'downtrend', 'alternate', 'double', 'triple', 'reversal', 'momentum'];
-            const patterns = this.engine.marketPatterns || {};
-            
-            for (let i = 0; i < models.length; i++) {
-                const div = document.createElement('div');
-                const patternKey = models[i].charAt(0).toUpperCase() + models[i].slice(1) + 'Score';
-                const isActive = patterns[patternKey] > 60;
-                div.className = 'mini-model ' + (isActive ? 'active' : '');
-                div.innerText = models[i].substring(0, 3).toUpperCase();
-                indicator.appendChild(div);
-            }
-        }
-
-        updateUIStatus(online) {
-            const dot = document.getElementById('statusDot');
-            const txt = document.getElementById('statusText');
-            if (online) {
-                dot.className = 'status-dot connected';
-                txt.innerText = 'ONLINE';
-                txt.style.color = '#00ff66';
-            } else {
-                dot.className = 'status-dot scanning';
-                txt.innerText = 'RETRYING';
-                txt.style.color = '#ffaa00';
-            }
-        }
-
-        start() {
-            this.poll();
-            setInterval(() => this.poll(), 1800);
-        }
+      this.retry += 1;
+      this.setStatus(false);
+      logIt(`⚠ All endpoints failed. Retry ${this.retry}.`, 'warn');
+      this.isPolling = false;
+      if (lastError) console.warn(lastError);
     }
 
-    function postLog(msg) {
-        const consoleEl = document.getElementById('logConsole');
-        const timestamp = new Date().toLocaleTimeString();
-        consoleEl.innerHTML += `<br>[${timestamp}] ${msg}`;
-        consoleEl.scrollTop = consoleEl.scrollHeight;
+    render(prediction, period) {
+      const stats = this.engine.getStats();
+      document.getElementById('periodDisplay').textContent = `TARGET • #${String(period).slice(-8)}`;
+      const predEl = document.getElementById('predictionDisplay');
+      predEl.textContent = prediction.signal;
+      predEl.className = `prediction ${prediction.signal === 'BIG' ? 'big' : 'small'}`;
+      document.getElementById('confidenceFill').style.width = `${prediction.confidence}%`;
+
+      const recent = this.engine.history.slice(0, 12).map(x => x.size.charAt(0)).join(' · ') || 'WAITING';
+      document.getElementById('patternDisplay').textContent = `◈ ${recent} ◈`;
+      document.getElementById('trendDisplay').textContent = this.engine.marketPhase;
+      document.getElementById('marketPhase').textContent = this.engine.marketPhase;
+      document.getElementById('signalStrength').textContent = `${this.engine.signalStrength}%`;
+      document.getElementById('patternQuality').textContent = `${this.engine.patternQuality}%`;
+      document.getElementById('lossGuard').textContent = this.engine.consecutiveLosses >= 1 ? 'ACTIVE' : 'ON';
+      document.getElementById('winRate').textContent = `${stats.winRate}%`;
+      document.getElementById('accuracy').textContent = `${stats.accuracy}%`;
+      document.getElementById('winsDisplay').textContent = stats.wins;
+      document.getElementById('lossesDisplay').textContent = stats.losses;
+      document.getElementById('streak').textContent = stats.streak;
+      document.getElementById('confDisplay').textContent = `${prediction.confidence}%`;
+      document.getElementById('winRate').className = 'value ' + (Number(stats.winRate) >= 50 ? 'win' : 'neutral');
+      document.getElementById('accuracy').className = 'value ' + (Number(stats.accuracy) >= 50 ? 'win' : 'neutral');
     }
 
-    const engine = new QuantumConsensusEngineV12();
-    const bridge = new NetworkBridge(engine);
+    setStatus(isLive) {
+      const dot = document.getElementById('statusDot');
+      const txt = document.getElementById('statusText');
+      if (isLive) {
+        dot.className = 'dot live';
+        txt.textContent = 'LIVE';
+        txt.style.color = '#19f0b5';
+      } else {
+        dot.className = 'dot retry';
+        txt.textContent = 'RETRY';
+        txt.style.color = '#ffb11a';
+      }
+    }
 
-    document.getElementById('resetMemoryBtn').addEventListener('click', () => {
-        engine.reset();
-        document.getElementById('logConsole').innerHTML = '[SYS] QUANT-SHIELD V12 PRO ENGINE ONLINE<br>[SYS] ENHANCED PATTERN DETECTION ACTIVE<br>[SYS] MARKET ANALYSIS ENABLED<br>[SYS] AWAITING MARKET DATA...';
-        document.getElementById('lossPreventionDisplay').innerText = '100%';
-        document.getElementById('patternQualityDisplay').innerText = '0%';
-        document.getElementById('marketPatternDisplay').innerText = 'NEUTRAL';
-        postLog('✨ System fully reset and ready for next cycle.');
-        bridge.poll();
-    });
+    start() {
+      this.pollOnce();
+      setInterval(() => this.pollOnce(), 2200);
+    }
+  }
 
-    window.addEventListener('DOMContentLoaded', () => {
-        bridge.start();
-    });
+  const engine = new AdaptiveEngine();
+  const bridge = new NetworkBridge(engine);
+
+  logIt('⚡ Engine initialize — adaptive pattern detection active.', 'info');
+  logIt('🧠 Multi-pattern consensus + anti-repeat safety enabled.', 'info');
+  logIt('🌐 API layer ready with fallback endpoints.', 'info');
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    engine.reset();
+    document.getElementById('logConsole').innerHTML = '';
+    logIt('🔄 Reset requested. Rebuilding signal memory and re-scanning patterns.', 'info');
+    bridge.pollOnce();
+  });
+
+  window.addEventListener('load', () => {
+    bridge.start();
+  });
 </script>
 </body>
 </html>
